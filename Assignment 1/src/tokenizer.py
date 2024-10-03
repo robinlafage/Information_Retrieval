@@ -9,7 +9,7 @@ class Tokenizer:
 
     def tokenize(self):
         token = ""
-        tokenList = []
+        tokenList = []  
         stopWordsFile = open(self.stopWordsPath)
         stopWordsFile = stopWordsFile.read()
         stopWords = stopWordsFile.split()
