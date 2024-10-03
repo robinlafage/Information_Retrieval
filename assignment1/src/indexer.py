@@ -1,10 +1,10 @@
 from parser import *
 
 class Indexer:
-    def __init__(self, inputFile, outputFile, minimumTokenLength):
+    def __init__(self, inputFile, outputFile, tokenizerOptions):
         self.inputFile = inputFile
         self.outputFile = outputFile
-        self.minimumTokenLength = minimumTokenLength
+        self.tokenizerOptions = tokenizerOptions
 
     def buildIndex(self):
         start = 0

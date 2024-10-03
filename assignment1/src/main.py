@@ -10,7 +10,10 @@ def main():
     if args.command == "index":
         print("Building the inverted index")
 
-        indexer = Indexer(args.inputFile, args.outputFile, args.minimumTokenLength)
+        tokenizerOptions = {
+            "minimumTokenLength": args.minimumTokenLength
+        }
+        indexer = Indexer(args.inputFile, args.outputFile, tokenizerOptions)
         indexer.buildIndex()
         
     elif args.command == "search":
