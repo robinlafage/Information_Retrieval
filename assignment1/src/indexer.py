@@ -10,7 +10,7 @@ class Indexer:
         self.tempDict = {}
 
     def buildIndex(self):
-        blocSize = 1000
+        blocSize = 10000
         i = 0
         currentBloc = 0
 

@@ -2,6 +2,7 @@
 
 import argparse
 from indexer import *
+import time
 
 def main():
     argsParser = readCommandLineArgs()
@@ -38,5 +39,8 @@ def readCommandLineArgs():
     return argsParser
 
 if __name__ == '__main__':
+    start = time.time()
     main()
+    end = time.time()
+    print(f"Execution time: {end - start} seconds")
 
