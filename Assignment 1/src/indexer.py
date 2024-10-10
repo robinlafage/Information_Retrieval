@@ -16,14 +16,19 @@ class Indexer:
         currentBloc = 0
 
         parser = Parser(None)
-        tokenizer = Tokenizer(None, self.tokenizerOptions["minimumTokenLength"], " .,;\'\"-_`@~\\/?!()[]\{\}", [])
+        tokenizer = Tokenizer(None, 
+                              self.tokenizerOptions["minimumTokenLength"], 
+                              self.tokenizerOptions["normalizeToLower"], 
+                              self.tokenizerOptions["cuttingCharactersFile"], 
+                              self.tokenizerOptions["stopwordsFile"], 
+                              self.tokenizerOptions["useStemming"])
 
         with open(self.inputFile, "r") as file:
             for line in file:
 
                 parser.line = line
                 parser.parse()
-                tokenizer.string = parser.text
+                tokenizer.stringToTokenize = parser.text
                 tokens = tokenizer.tokenize()
                 self.buildDictionary(tokens, parser.docId)
 
