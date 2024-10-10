@@ -12,7 +12,11 @@ def main():
         print("Building the inverted index")
 
         tokenizerOptions = {
-            "minimumTokenLength": args.minimumTokenLength
+            "minimumTokenLength": args.minimumTokenLength,
+            "normalizeToLower" : args.normalizeToLower,
+            "cuttingCharactersFile" : args.cuttingCharactersFile,
+            "stopWordsFile" : args.stopWordsFile,
+            "useStemming" : args.useStemming
         }
         indexer = Indexer(args.inputFile, args.outputFile, tokenizerOptions)
         indexer.buildIndex()
@@ -32,6 +36,10 @@ def readCommandLineArgs():
     indexer_parser.add_argument("inputFile", type=str, help="Files to index")
     indexer_parser.add_argument("outputFile", type=str, help="File to save the index")
     indexer_parser.add_argument("-m", "--minimumTokenLength", type=int, default=1, help="Minimum token length to be indexed")
+    indexer_parser.add_argument("-w","--stopwordsFile", type=str, default="../stopwords-en.txt", help="File containing stopwords")
+    indexer_parser.add_argument("-c", "--cuttingCharactersFile", type=str, default="../cuttingCharacters.txt", help="File containing characters to cut")
+    indexer_parser.add_argument("-n", "--normalizeToLower", type=bool, default=True, help="To activate or not the normalization to lower case")
+    indexer_parser.add_argument("-s", "--useStemming", type=bool, default=True, help="To activate or not the stemming after tokenization")
 
     searcher_parser = subparsers.add_parser("search", help="Searcher engine")
     searcher_parser.add_argument("indexFile", type=str, help="File with the inverted index")
