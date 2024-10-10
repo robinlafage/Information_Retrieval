@@ -42,5 +42,5 @@ if __name__ == '__main__':
     start = time.time()
     main()
     end = time.time()
-    print(f"Execution time: {end - start} seconds")
+    print(f"Execution time: {end - start} seconds - {(end - start) / 60} minutes")
 
