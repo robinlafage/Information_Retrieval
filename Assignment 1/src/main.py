@@ -15,10 +15,14 @@ def main():
             "minimumTokenLength": args.minimumTokenLength,
             "normalizeToLower" : args.normalizeToLower,
             "cuttingCharactersFile" : args.cuttingCharactersFile,
-            "stopWordsFile" : args.stopWordsFile,
-            "useStemming" : args.useStemming
+            "stopwordsFile" : args.stopwordsFile,
         }
-        indexer = Indexer(args.inputFile, args.outputFile, tokenizerOptions)
+
+        stemmerOptions = {
+            "stemming" : args.stemming
+        }
+
+        indexer = Indexer(args.inputFile, args.outputFile, tokenizerOptions, stemmerOptions)
         indexer.buildIndex()
         
     elif args.command == "search":
@@ -38,9 +42,10 @@ def readCommandLineArgs():
     indexer_parser.add_argument("-m", "--minimumTokenLength", type=int, default=1, help="Minimum token length to be indexed")
     indexer_parser.add_argument("-w","--stopwordsFile", type=str, default="../stopwords-en.txt", help="File containing stopwords")
     indexer_parser.add_argument("-c", "--cuttingCharactersFile", type=str, default="../cuttingCharacters.txt", help="File containing characters to cut")
-    indexer_parser.add_argument("-n", "--normalizeToLower", type=bool, default=True, help="To activate or not the normalization to lower case")
-    indexer_parser.add_argument("-s", "--useStemming", type=bool, default=True, help="To activate or not the stemming after tokenization")
-
+    indexer_parser.add_argument("--normalizeToLower", type=bool, default=True, help="To activate or not the normalization to lower case", action=argparse.BooleanOptionalAction)
+    indexer_parser.add_argument("--stemming", type=bool, default=True, help="To activate or not the stemming after tokenization", action=argparse.BooleanOptionalAction)
+    
+    
     searcher_parser = subparsers.add_parser("search", help="Searcher engine")
     searcher_parser.add_argument("indexFile", type=str, help="File with the inverted index")
 

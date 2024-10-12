@@ -1,14 +1,10 @@
-from stemmer import *
-
 class Tokenizer:
-    def __init__(self, stringToTokenize, minimumTokenLength, normalizeToLowerCase, cuttingCharactersPath, stopWordsPath, useStemming):
+    def __init__(self, stringToTokenize, minimumTokenLength, normalizeToLowerCase, cuttingCharactersPath, stopWordsPath):
         self.stringToTokenize = stringToTokenize
         self.minimumTokenLength = minimumTokenLength
         self.normalizeToLowerCase = normalizeToLowerCase
         self.cuttingCharactersPath = cuttingCharactersPath
         self.stopWordsPath = stopWordsPath
-        #StopWords won't work if we don't set the lowercase before checking if it's in the StopWords list
-        self.useStemming = useStemming
     
     def tokenize(self):
         """Function to create tokens from a given string
@@ -73,11 +69,6 @@ class Tokenizer:
            and token not in stopWords:
             tokenList.append(token)
 
-        #If the usage of stemming is activated, then we launch the stemming on our token list 
-        #We then save the returned list in place of the token list
-        if self.useStemming :
-            stemmer = Stemmer(normalizeToLowerCase, tokenList)
-            tokenList = stemmer.stem()
         return tokenList
 
 if __name__ == "__main__" :
@@ -86,16 +77,11 @@ if __name__ == "__main__" :
     minimumTokenLength = 3
     cuttingCharactersPath="../cuttingCharacters.txt"
     stopwordsPath = "../stopwords-en.txt"
-    useStemmer = False
     tokenizer = Tokenizer(stringToTokenize, 
                             minimumTokenLength,
                             normalizeToLowerCase,
                             cuttingCharactersPath,
-                            stopwordsPath,
-                            useStemmer)
+                            stopwordsPath)
     tokens = tokenizer.tokenize()
-    if useStemmer :
-        stemmer = Stemmer(normalizeToLowerCase, tokens)
-        tokens = stemmer.stem()
     print(str(tokens))
     
