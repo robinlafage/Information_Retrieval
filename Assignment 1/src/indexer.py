@@ -2,7 +2,6 @@ from parser import *
 from tokenizer import *
 from stemmer import *
 import json
-import ijson
 
 #BUG : If the destination directory doesn't already exist, we crash 
 
@@ -97,14 +96,16 @@ class Indexer:
                 self.tempDict[originalToken][docId] = []
 
     def writeTempDictInDisk(self, currentBloc):
-        if self.stemmerOptions["stemming"] :
+        if self.stemmerOptions["stemming"]:
             self.tempDictAfterStemming = dict(sorted(self.tempDictAfterStemming.items()))
-            with open(f"../tmpIndexesStemmer/indexPart{currentBloc}.json", "w") as file:
-                file.write(json.dumps(self.tempDictAfterStemming))
-        else :
+            with open(f"../tmpIndexesStemmer/indexPart{currentBloc}.jsonl", "w") as file:
+                for key, value in self.tempDictAfterStemming.items():
+                    file.write(json.dumps({key: value}) + "\n")
+        else:
             self.tempDict = dict(sorted(self.tempDict.items()))
-            with open(f"../tmpIndexesNoStemmer/indexPart{currentBloc}.json", "w") as file:
-                file.write(json.dumps(self.tempDict))
+            with open(f"../tmpIndexesNoStemmer/indexPart{currentBloc}.jsonl", "w") as file:
+                for key, value in self.tempDict.items():
+                    file.write(json.dumps({key: value}) + "\n")
 
 
     # def writeTempDictInDisk(self, currentBloc):
