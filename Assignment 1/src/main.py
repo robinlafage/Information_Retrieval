@@ -23,7 +23,9 @@ def main():
         }
 
         indexer = Indexer(args.inputFile, args.outputFile, tokenizerOptions, stemmerOptions)
-        indexer.buildIndex()
+        # indexer.buildIndex()
+        merger = Merger(args.outputFile)
+        merger.merge2Indexes(0, 1)
         
     elif args.command == "search":
         print("Searcher engine")
