@@ -18,11 +18,11 @@ class Indexer:
     def buildIndex(self):
         self.buildPartialsIndexes()
         merger = Merger(self.outputFile)
-        # merger.merge()
+        merger.merge()
 
 
     def buildPartialsIndexes(self):
-        blocSize = 1000
+        blocSize = 10000
         i = 0
         currentBloc = 0
 
