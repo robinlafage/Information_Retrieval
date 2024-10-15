@@ -9,6 +9,7 @@ class Merger:
     def merge(self):
         #Merge all indexes
 
+        self.merge2Indexes(0, 1)
 
         with open(self.outputFile, "a+") as file:
             file.write("}")
@@ -22,56 +23,34 @@ class Merger:
         i2 = -1
 
         with open(f"../tmpIndexes/indexPart{a}.jsonl", "r") as index1, open(f"../tmpIndexes/indexPart{b}.jsonl", "r") as index2:
+            stop = 0
             while True:
-                stop = 0
                 if i1 == -1 or i1 == len(index1Lines):
                     index1Lines = [json.loads(line) for line in [index1.readline() for _ in range(nbLines)] if line]
                     i1 = 0
                     if not index1Lines:
-                        print("break 1")
                         stop += 1
                 if i2 == -1 or i2 == len(index2Lines):
                     index2Lines = [json.loads(line2) for line2 in [index2.readline() for _ in range(nbLines)] if line2]
                     i2 = 0
                     if not index2Lines:
-                        print("break 2")
                         stop += 1
 
                 if stop == 2:
                     break
 
                 
-                while (i1 < len(index1Lines) and i2 < len(index2Lines)) or (i1 == len(index1Lines) and i2 < len(index2Lines)) or (i1 < len(index1Lines) and i2 == len(index2Lines)):
-                    if i1 == len(index1Lines):
-                        term1 = None
-                    else:
-                        term1 = list(index1Lines[i1].keys())[0]
+                while (i1 < len(index1Lines) and i2 < len(index2Lines)):
+                    term1 = list(index1Lines[i1].keys())[0]
+                    term2 = list(index2Lines[i2].keys())[0]
 
-                    if i2 == len(index2Lines):
-                        term2 = None
-                    else:
-                        term2 = list(index2Lines[i2].keys())[0]
-
-                    termToTreat = 0
-                    if term1 is not None and term2 is not None:
-                        if term1 < term2:
-                            termToTreat = 1
-                        elif term1 > term2:
-                            termToTreat = 2
-                        else:
-                            termToTreat = 3
-                    elif term1 is not None:
-                        termToTreat = 1
-                    elif term2 is not None:
-                        termToTreat = 2
-
-                    if termToTreat == 1:
+                    if term1 < term2:
                         self.tempDict.update(index1Lines[i1])
                         i1 += 1
-                    elif termToTreat == 2:
+                    elif term2 < term1:
                         self.tempDict.update(index2Lines[i2])
                         i2 += 1
-                    elif termToTreat == 3:
+                    elif term1 == term2:
                         d = self.merge2Dicts(index1Lines[i1], index2Lines[i2], term1)
                         self.tempDict.update(d)
                         d.clear()
