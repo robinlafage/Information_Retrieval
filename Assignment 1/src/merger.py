@@ -7,18 +7,7 @@ class Merger:
 
 
     def merge(self):
-        i = 0
-        while True:
-            try:
-                self.merge2Indexes(i, i+1)
-                i += 2
-            except FileNotFoundError:
-                try:
-                    with open(f"../tmpIndexes/indexPart{i}.jsonl"):
-                        self.appendLastFile(i)
-                except FileNotFoundError:
-                    pass
-                break
+        #Merge all indexes
 
 
         with open(self.outputFile, "a+") as file:
