@@ -12,32 +12,31 @@ class Merger:
     def merge(self):
         files = self.getFilesFromDirectory(self.indexesDir)
         i = 0
-        while len(files) > 2:
+        while len(files) > 1:
             # Prendre les deux premiers fichiers
             file1 = files.pop(0)
             file2 = files.pop(0)
-            
+
             # Définir un fichier temporaire pour la fusion
             mergedFile = f"{self.indexesDir}/mergedPart{i}.jsonl"  # Nom temporaire, à renommer après chaque fusion
-            
+        
             # Appel de la fonction de fusion des deux fichiers
-            self.merge2Indexes(file1, file2, mergedFile, False)
+            if len(files) == 0:
+                self.merge2Indexes(file1, file2, self.outputFile, True)
+            else :
+                self.merge2Indexes(file1, file2, mergedFile, False)
             
             # Supprimer les deux fichiers fusionnés
             os.remove(file1)
             os.remove(file2)
             
             # Ajouter le fichier fusionné à la liste
-            files.insert(0, mergedFile)
-
+            if not len(files) == 0 :
+                files.append(mergedFile)
             i += 1
 
-
-        self.merge2Indexes(files[0], files[1], self.outputFile, True)
-        os.remove(files[0])
-        os.remove(files[1])
-
         with open(self.outputFile, "a+") as file:
+            # ???
             file.write("}")
 
 
@@ -53,7 +52,7 @@ class Merger:
             return []
 
     def merge2Indexes(self, file1, file2, mergedFile, final):
-        nbLines = 100
+        nbLines = 10000
         maxTerms = 1000
 
         i1 = -1
@@ -154,4 +153,4 @@ class Merger:
 
 if __name__ == "__main__":
     merger = Merger("out.json")
-    merger.merge2Indexes("../tmpIndexes/merged.jsonl", "../tmpIndexes/indexPart2.jsonl", "../tmpIndexes/merged2.jsonl", False)
+    merger.merge()

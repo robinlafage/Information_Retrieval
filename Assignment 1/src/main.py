@@ -45,7 +45,6 @@ def readCommandLineArgs():
     indexer_parser.add_argument("--normalizeToLower", type=bool, default=True, help="To activate or not the normalization to lower case", action=argparse.BooleanOptionalAction)
     indexer_parser.add_argument("--stemming", type=bool, default=True, help="To activate or not the stemming after tokenization", action=argparse.BooleanOptionalAction)
     
-    
     searcher_parser = subparsers.add_parser("search", help="Searcher engine")
     searcher_parser.add_argument("indexFile", type=str, help="File with the inverted index")
 
