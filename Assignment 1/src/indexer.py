@@ -20,7 +20,7 @@ class Indexer:
 
 
     def buildPartialsIndexes(self):
-        blocSize = 10000
+        blocSize = 5
         i = 0
         currentBloc = 0
 
@@ -55,6 +55,11 @@ class Indexer:
                     currentBloc += 1
 
         if self.tempDict:
+            if self.stemmerOptions["stemming"] :
+                stemmer.tokenList = list(self.tempDict.keys())
+                tokensStemmed = stemmer.stem()
+                #We build a dict with the stemmed tokens in order to write the partial index
+                self.buildDictionaryAfterStemming(tokensStemmed)
             self.writeTempDictInDisk(currentBloc)
             self.tempDict = {}
 
