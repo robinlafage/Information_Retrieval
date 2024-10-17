@@ -8,7 +8,11 @@ class Stemmer:
         tokenListAfterStemming = []
         for token in self.tokenList :
             #We never let the stemmer option to normalize to lower, always the work of tokenizer
-            tokenAfterStemming = stemmerLibrary.PorterStemmer().stem(token, False)
+            #If the token is only composed of digits, there is no need to stem it
+            if not token.isdigit():
+                tokenAfterStemming = stemmerLibrary.PorterStemmer().stem(token, False)
+            else :
+                tokenAfterStemming = token
             tokenListAfterStemming.append([token, tokenAfterStemming])
         return tokenListAfterStemming
 

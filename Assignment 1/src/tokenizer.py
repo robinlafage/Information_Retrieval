@@ -1,9 +1,9 @@
 class Tokenizer:
-    def __init__(self, stringToTokenize, minimumTokenLength, normalizeToLowerCase, cuttingCharactersPath, stopWordsPath):
+    def __init__(self, stringToTokenize, minimumTokenLength, normalizeToLowerCase, allowedCharactersPath, stopWordsPath):
         self.stringToTokenize = stringToTokenize
         self.minimumTokenLength = minimumTokenLength
         self.normalizeToLowerCase = normalizeToLowerCase
-        self.cuttingCharactersPath = cuttingCharactersPath
+        self.allowedCharactersPath = allowedCharactersPath
         self.stopWordsPath = stopWordsPath
     
     def tokenize(self):
@@ -23,25 +23,22 @@ class Tokenizer:
             stopWords = []
 
         try :
-            cuttingCharactersFile = open(self.cuttingCharactersPath)
-            cuttingCharacters = cuttingCharactersFile.read()
+            allowedCharactersFile = open(self.allowedCharactersPath)
+            allowedCharacters = allowedCharactersFile.read()
         except : 
-            cuttingCharacters = " "
+            allowedCharacters = "abcdefghijklmnopqrstuvwxyz"
         
         #Usage of enumarate to have an index on the string, in order to check next character
         for i, character in enumerate(self.stringToTokenize) : 
 
             #If the character is not a cutting character, we add it to the token and go to next iteration of the loop 
-            if character not in cuttingCharacters :
+            if character.lower() in allowedCharacters :
                 token = token + character
             
-            #Exception rule : if a dot is directly followed by another character (ex U.S.A.), we decide it's one token only (USA)
-            elif i + 1 < len(self.stringToTokenize) and character in "." : 
-                if self.stringToTokenize[i+1] and not self.stringToTokenize[i+1] in cuttingCharacters :
-                    pass
+            #Deleting the rule for U.S.A, in order to avoid multiple tokens when whe have a text which like in PMID:30918203 : "professionals.Methodes\n\n"
 
             
-            #Since now, the character is a cutting character
+            #Since now, the character is NOT an authorized character
 
             #If the token is in the stopwords list we delete the token 
             #As the list is only in lower, we have to check the lower form of the token, even if normalizeToLower is False
@@ -71,15 +68,15 @@ class Tokenizer:
         return tokenList
 
 if __name__ == "__main__" :
-    stringToTokenize = "Organization of the VeRY genes encoding complement receptors type 1 and 2, decay-accelerating factor, and C4-binding protein in the RCA locus on human chromosome 1.\n\nThe organization and physical linkage of four members of a major complement locus, the RCA locus, have been determined using the technique of pulsed field gradient gel electrophoresis in conjunction with Southern blotting. The genes encoding CR1, CR2, DAF, and C4bp were aligned in that order within a region of 750 kb. In addition, the 5' to 3' orientation of the CR1 gene (5' proximal to CR2) was determined using 5'- and 3'-specific DNA probes. The proximity of these genes may be related to structural and functional homologies of the protein products. Overall, a restriction map including 1,500 kb of DNA was prepared, and this map will be important for positioning of additional coding sequences within this region on the long arm of chromosome 1."
+    stringToTokenize = "ff fffff fff[Vitalizing public health activities through community assessment: A report of the Committee on Public Health Nursing 2014-2017].\n\nObjectives\u3000This report aims to present the community assessment model developed by the Committee on Public Health Nursing (6th term) of the Japanese Association of Public Health. This new model was designed such that it could be applied to a broad range of public health activities. It aims at theorizing public health nurses' practice-based knowledge and sharing it among other public health professionals.Methods\u3000The model was developed during seven committee meetings held from October 2014 to September 2017. In the first step, we brainstormed the definition and methods of community assessment and constructed a framework for a literature review. In the second step, information on theories, research, and practice relevant to community assessment was reviewed based on this framework. In the third step, the community assessment model was developed based on the results of the literature review and the practice experience of the committee members. In the last step, we examined the applicability of this model to the practice of occupational health and public health administration.Project activities\u3000We defined community assessment as the \"skills and methods based on applied science that drive Plan-Do-Check-Action (PDCA) cycles in every activity that aims at achieving a better quality of life (QOL).\" We further classified community assessment into two types; comprehensive assessment and targeted assessment. The model underlined that community assessment was a continuous and developmental process that occurs throughout every stage of the PDCA cycle, and that it was oriented toward improving the QOL of community residents. This model also purported that the empirical and scientific intuition, and ethical sensitivity of assessors were among the key determinants of assessment quality.Conclusion\u3000The model on community assessment developed in the present study based on the empirical knowledge of public health nurses could be applied to all types of public health activities in communities."
     normalizeToLowerCase = False
     minimumTokenLength = 3
-    cuttingCharactersPath="../cuttingCharacters.txt"
+    allowedCharactersPath="../cuttingWordsV2.txt"
     stopwordsPath = "../stopwords-en.txt"
     tokenizer = Tokenizer(stringToTokenize, 
                             minimumTokenLength,
                             normalizeToLowerCase,
-                            cuttingCharactersPath,
+                            allowedCharactersPath,
                             stopwordsPath)
     tokens = tokenizer.tokenize()
     print(str(tokens))

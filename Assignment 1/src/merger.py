@@ -42,8 +42,9 @@ class Merger:
                 files.append(mergedFile)
             i += 1
 
-        with open(self.outputFile, "a+") as file:
-            file.write("}")
+        #Not useful anymore
+        # with open(self.outputFile, "a+") as file:
+        #     file.write("}")
 
 
     def getFilesFromDirectory(self, directory):
