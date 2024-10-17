@@ -13,30 +13,29 @@ class Merger:
         files = self.getFilesFromDirectory(self.indexesDir)
         i = 0
         while len(files) > 1:
-            # Prendre les deux premiers fichiers
+            # Take first two files
             file1 = files.pop(0)
             file2 = files.pop(0)
 
-            # Définir un fichier temporaire pour la fusion
-            mergedFile = f"{self.indexesDir}/mergedPart{i}.jsonl"  # Nom temporaire, à renommer après chaque fusion
+            # Define a temporary file hosting the merge
+            mergedFile = f"{self.indexesDir}/mergedPart{i}.jsonl"  
         
-            # Appel de la fonction de fusion des deux fichiers
+            # Call the merging function
             if len(files) == 0:
                 self.merge2Indexes(file1, file2, self.outputFile, True)
             else :
                 self.merge2Indexes(file1, file2, mergedFile, False)
             
-            # Supprimer les deux fichiers fusionnés
+            # Delete merged files
             os.remove(file1)
             os.remove(file2)
             
-            # Ajouter le fichier fusionné à la liste
+            # Add merged file to the list
             if not len(files) == 0 :
                 files.append(mergedFile)
             i += 1
 
         with open(self.outputFile, "a+") as file:
-            # ???
             file.write("}")
 
 
@@ -48,7 +47,7 @@ class Merger:
             
             return files
         except FileNotFoundError:
-            print(f"Le répertoire '{directory}' n'existe pas.")
+            print(f"Directory '{directory}' doesn't exist.")
             return []
 
     def merge2Indexes(self, file1, file2, mergedFile, final):

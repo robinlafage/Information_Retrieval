@@ -4,8 +4,6 @@ from stemmer import *
 from merger import *
 import json
 
-#BUG : If the destination directory doesn't already exist, we crash 
-
 class Indexer:
     def __init__(self, inputFile, outputFile, tokenizerOptions, stemmerOptions):
         self.inputFile = inputFile
