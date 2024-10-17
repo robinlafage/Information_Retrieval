@@ -12,6 +12,7 @@ class Indexer:
         self.stemmerOptions = stemmerOptions
         self.tempDict = {}
         self.tempDictAfterStemming = {}
+        self.outputDirectory = "../tmpIndexes"
 
     def buildIndex(self):
         self.buildPartialsIndexes()
@@ -20,7 +21,7 @@ class Indexer:
 
 
     def buildPartialsIndexes(self):
-        blocSize = 5
+        blocSize = 10000
         i = 0
         currentBloc = 0
 
@@ -106,13 +107,15 @@ class Indexer:
                 self.tempDict[originalToken][docId] = []
 
     def writeTempDictInDisk(self, currentBloc):
+        if not os.path.exists(self.outputDirectory):
+            os.mkdir(self.outputDirectory)
         if self.stemmerOptions["stemming"]:
             self.tempDictAfterStemming = dict(sorted(self.tempDictAfterStemming.items()))
-            with open(f"../tmpIndexes/indexPart{currentBloc}.jsonl", "w") as file:
+            with open(f"{self.outputDirectory}/indexPart{currentBloc}.jsonl", "w") as file:
                 for key, value in self.tempDictAfterStemming.items():
                     file.write(json.dumps({key: value}) + "\n")
         else:
             self.tempDict = dict(sorted(self.tempDict.items()))
-            with open(f"../tmpIndexes/indexPart{currentBloc}.jsonl", "w") as file:
+            with open(f"{self.outputDirectory}/indexPart{currentBloc}.jsonl", "w") as file:
                 for key, value in self.tempDict.items():
                     file.write(json.dumps({key: value}) + "\n")

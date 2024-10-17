@@ -35,9 +35,8 @@ class Tokenizer:
             if character not in cuttingCharacters :
                 token = token + character
             
-            #Exception rule : if it's a compound word (ex mother-in-law), we decide it's one token only (motherinlaw)
             #Exception rule : if a dot is directly followed by another character (ex U.S.A.), we decide it's one token only (USA)
-            elif i + 1 < len(self.stringToTokenize) and character in ".-" : 
+            elif i + 1 < len(self.stringToTokenize) and character in "." : 
                 if self.stringToTokenize[i+1] and not self.stringToTokenize[i+1] in cuttingCharacters :
                     pass
 
