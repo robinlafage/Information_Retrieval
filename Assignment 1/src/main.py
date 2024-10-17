@@ -14,7 +14,7 @@ def main():
         tokenizerOptions = {
             "minimumTokenLength": args.minimumTokenLength,
             "normalizeToLower" : args.normalizeToLower,
-            "cuttingCharactersFile" : args.cuttingCharactersFile,
+            "allowedCharactersFile" : args.allowedCharactersFile,
             "stopwordsFile" : args.stopwordsFile,
         }
 
@@ -41,7 +41,7 @@ def readCommandLineArgs():
     indexer_parser.add_argument("outputFile", type=str, help="File to save the index")
     indexer_parser.add_argument("-m", "--minimumTokenLength", type=int, default=1, help="Minimum token length to be indexed")
     indexer_parser.add_argument("-w","--stopwordsFile", type=str, default="../stopwords-en.txt", help="File containing stopwords")
-    indexer_parser.add_argument("-c", "--cuttingCharactersFile", type=str, default="../cuttingCharacters.txt", help="File containing characters to cut")
+    indexer_parser.add_argument("-a", "--allowedCharactersFile", type=str, default="../allowedCharacters.txt", help="File containing characters to cut")
     indexer_parser.add_argument("--normalizeToLower", type=bool, default=True, help="To activate or not the normalization to lower case", action=argparse.BooleanOptionalAction)
     indexer_parser.add_argument("--stemming", type=bool, default=True, help="To activate or not the stemming after tokenization", action=argparse.BooleanOptionalAction)
     

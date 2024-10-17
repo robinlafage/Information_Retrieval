@@ -29,7 +29,7 @@ class Indexer:
         tokenizer = Tokenizer(None, 
                               self.tokenizerOptions["minimumTokenLength"], 
                               self.tokenizerOptions["normalizeToLower"], 
-                              self.tokenizerOptions["cuttingCharactersFile"], 
+                              self.tokenizerOptions["allowedCharactersFile"], 
                               self.tokenizerOptions["stopwordsFile"])
         if self.stemmerOptions["stemming"] :
             stemmer = Stemmer(None)
