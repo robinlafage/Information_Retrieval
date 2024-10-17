@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 class Merger:
     def __init__(self, outputFile):
@@ -12,11 +13,15 @@ class Merger:
     def merge(self):
         files = self.getFilesFromDirectory(self.indexesDir)
         i = 0
+        if len(files) == 1 :
+            with open("empty_file.jsonl", "w") as file :
+                files.append("empty_file.jsonl")
+            file.close()
         while len(files) > 1:
             # Take first two files
             file1 = files.pop(0)
             file2 = files.pop(0)
-
+            
             # Define a temporary file hosting the merge
             mergedFile = f"{self.indexesDir}/mergedPart{i}.jsonl"  
         
@@ -58,22 +63,37 @@ class Merger:
         i2 = -1
 
         with open(file1, "r") as index1, open(file2, "r") as index2:
-            stop = 0
+            stop1 = False
+            stop2 = False
             while True:
                 if i1 == -1 or i1 == len(index1Lines):
                     index1Lines = [json.loads(line) for line in [index1.readline() for _ in range(nbLines)] if line]
                     i1 = 0
                     if not index1Lines:
-                        stop += 1
+                        stop1 = True
                 if i2 == -1 or i2 == len(index2Lines):
                     index2Lines = [json.loads(line2) for line2 in [index2.readline() for _ in range(nbLines)] if line2]
                     i2 = 0
                     if not index2Lines:
-                        stop += 1
+                        stop2 = True
 
-                if stop == 2:
+                if stop1 == True and stop2 == True:
                     break
-
+                
+                elif stop1 == True : 
+                    while (i2 < len(index2Lines)):
+                        if final:
+                            self.tempDict.update(index2Lines[i2])
+                        else:
+                            self.jsonList.append(index2Lines[i2])
+                        i2 += 1
+                elif stop2 == True :
+                    while (i1 < len(index1Lines)):
+                        if final:
+                            self.tempDict.update(index1Lines[i1])
+                        else:
+                            self.jsonList.append(index1Lines[i1])
+                        i1 += 1
                 
                 while (i1 < len(index1Lines) and i2 < len(index2Lines)):
                     term1 = list(index1Lines[i1].keys())[0]
