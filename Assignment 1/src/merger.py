@@ -13,6 +13,8 @@ class Merger:
     def merge(self):
         files = self.getFilesFromDirectory(self.indexesDir)
         i = 0
+        if os.path.exists(self.outputFile):
+            os.remove(self.outputFile)
         if len(files) == 1 :
             with open("empty_file.jsonl", "w") as file :
                 files.append("empty_file.jsonl")
@@ -27,7 +29,7 @@ class Merger:
         
             # Call the merging function
             if len(files) == 0:
-                self.merge2Indexes(file1, file2, self.outputFile, True)
+                self.merge2Indexes(file1, file2, self.outputFile, False)
             else :
                 self.merge2Indexes(file1, file2, mergedFile, False)
             
@@ -143,17 +145,17 @@ class Merger:
                 file.write("{")
             else:
                 file.seek(file.tell() - 1)
-                file.write(", ")
+                file.write(",")
 
             for key, dict2 in tmpDict.items():
-                file.write(f"\"{key}\": {{")
+                file.write(f"\"{key}\":{{")
                 for i, (key2, value) in enumerate(dict2.items()):
-                    file.write(f"\"{key2}\": {value}")
+                    file.write(f"\"{key2}\":{value}")
                     if i < len(dict2) - 1:
-                        file.write(", ")
+                        file.write(",")
                 file.write("}")
                 if list(tmpDict.keys())[-1] != key:
-                    file.write(", ")
+                    file.write(",")
 
 
     def merge2Dicts(self, d1, d2, term):
