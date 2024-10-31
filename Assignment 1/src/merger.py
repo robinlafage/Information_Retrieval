@@ -3,12 +3,13 @@ import os
 import time
 
 class Merger:
-    def __init__(self, outputFile):
+    def __init__(self, outputFile, tokenizerOptions, stemmerOptions):
         self.outputFile = outputFile
         self.tempDict = {}
         self.jsonList = list()
         self.indexesDir = "../tmpIndexes"
-
+        self.tokenizerOptions = tokenizerOptions
+        self.stemmerOptions = stemmerOptions
 
     def merge(self):
         files = self.getFilesFromDirectory(self.indexesDir)
@@ -172,7 +173,33 @@ class Merger:
                 file.write("\n")
             self.jsonList.clear()
 
+    def defineMetadata(self):
+        metadata = {}
+        metadata["metadata"]={}
+        metadata["metadata"]["stemming"]=self.stemmerOptions["stemming"]
+        metadata["metadata"]["minimumTokenLength"]=self.tokenizerOptions["minimumTokenLength"]
+        metadata["metadata"]["normalizeToLower"]=self.tokenizerOptions["normalizeToLower"]
+        metadata["metadata"]["allowedCharactersFile"]=self.tokenizerOptions["allowedCharactersFile"]
+        metadata["metadata"]["stopwordsFile"]=self.tokenizerOptions["stopwordsFile"]
+        stringMetadata = json.dumps(metadata)
+        return stringMetadata
+
+    #TODO : Calculate TF-IDF before adding a term in a dict on next function
+    def calculateTfIdf(self):
+        pass
+    
+    #TODO Select in the index all the terms starting with the character. Maybe just work with letters here, and an "other" index 
+    def cutIndexDependingOnLetters(self):
+        metadata = self.defineMetadata()
+        nbLines = 10000
+        maxTerms = 10000
+        with open(self.outputFile, 'r') as indexFile, open(self.tokenizerOptions["allowedCharactersFile"],'r') as charactersFile:
+            characters = charactersFile.read()
+            for character in characters:
+                pass
+
+        pass
 
 if __name__ == "__main__":
-    merger = Merger("out.json")
+    merger = Merger("out.json", {"minimumTokenLength" : 1, "normalizeToLower" :True, "allowedCharactersFile":"../allowedCharacters.txt", "stopwordsFile":"../stopwords-en.txt"}, {"stemming":True})
     merger.merge()
