@@ -48,6 +48,8 @@ class Merger:
     
         #On end, we split the index
         self.cutIndexDependingOnLetters()
+        if os.path.exists(self.outputFile):
+            os.remove(self.outputFile)
 
         #Not useful anymore
         # with open(self.outputFile, "a+") as file:
