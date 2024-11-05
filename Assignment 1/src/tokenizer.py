@@ -31,11 +31,9 @@ class Tokenizer:
         #Usage of enumarate to have an index on the string, in order to check next character
         for i, character in enumerate(self.stringToTokenize) : 
 
-            #If the character is not a cutting character, we add it to the token and go to next iteration of the loop 
+            #If the character is an allowed character, we add it to the token and go to next iteration of the loop 
             if character.lower() in allowedCharacters :
                 token = token + character
-            
-            #Deleting the rule for U.S.A, in order to avoid multiple tokens when whe have a text which like in PMID:30918203 : "professionals.Methodes\n\n"
 
             
             #Since now, the character is NOT an authorized character

@@ -42,6 +42,9 @@ class Merger:
             if not len(files) == 0 :
                 files.append(mergedFile)
             i += 1
+    
+        #On end, we split the index
+        self.cutIndexDependingOnCharacter()
 
         #Not useful anymore
         # with open(self.outputFile, "a+") as file:
@@ -187,18 +190,41 @@ class Merger:
     #TODO : Calculate TF-IDF before adding a term in a dict on next function
     def calculateTfIdf(self):
         pass
-    
-    #TODO Select in the index all the terms starting with the character. Maybe just work with letters here, and an "other" index 
-    def cutIndexDependingOnLetters(self):
-        metadata = self.defineMetadata()
-        nbLines = 10000
-        maxTerms = 10000
-        with open(self.outputFile, 'r') as indexFile, open(self.tokenizerOptions["allowedCharactersFile"],'r') as charactersFile:
-            characters = charactersFile.read()
-            for character in characters:
-                pass
 
-        pass
+
+    def cutIndexDependingOnCharacter(self):
+        metadata = self.defineMetadata()
+        characterToPut = ''
+        nbLines = 10
+        i = 0
+        newFile=True
+        with open(self.outputFile, 'r') as indexFile:
+            line = indexFile.readline()
+            while line != '' :
+                if i==nbLines :
+                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                    i = 0
+                if newFile == True :
+                    self.jsonList.append(json.loads(metadata))
+                    newFile = False
+                linejson = json.loads(line)
+                token = list(linejson.keys())[0]
+                if characterToPut == '' :
+                    characterToPut = token[0].lower()
+                if token[0].lower() == characterToPut :
+                    self.jsonList.append(linejson)
+                    i+=1
+                else :
+                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                    i = 0
+                    self.jsonList.append(json.loads(metadata))
+                    characterToPut = token[0].lower()
+                    self.jsonList.append(linejson)   
+                    i+=1   
+                line = indexFile.readline()
+            if self.jsonList != [] :
+                self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+
 
 if __name__ == "__main__":
     merger = Merger("out.json", {"minimumTokenLength" : 1, "normalizeToLower" :True, "allowedCharactersFile":"../allowedCharacters.txt", "stopwordsFile":"../stopwords-en.txt"}, {"stemming":True})
