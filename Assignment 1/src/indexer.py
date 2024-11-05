@@ -16,7 +16,7 @@ class Indexer:
 
     def buildIndex(self):
         self.buildPartialsIndexes()
-        merger = Merger(self.outputFile, self.tokenizerOptions, self.stemmerOptions)
+        merger = Merger(self.inputFile, self.outputFile, self.tokenizerOptions, self.stemmerOptions)
         merger.merge()
 
 

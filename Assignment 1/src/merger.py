@@ -1,15 +1,18 @@
 import json
+import math
 import os
 import time
 
 class Merger:
-    def __init__(self, outputFile, tokenizerOptions, stemmerOptions):
+    def __init__(self, inputFile, outputFile, tokenizerOptions, stemmerOptions):
+        self.inputFile = inputFile
         self.outputFile = outputFile
         self.tempDict = {}
         self.jsonList = list()
         self.indexesDir = "../tmpIndexes"
         self.tokenizerOptions = tokenizerOptions
         self.stemmerOptions = stemmerOptions
+        self.N = self.getNbLinesOfFile(self.inputFile)
 
     def merge(self):
         files = self.getFilesFromDirectory(self.indexesDir)
@@ -169,6 +172,7 @@ class Merger:
     def appendToJsonl(self, outputFile):
         with open(outputFile, "a+") as file:
             for d in self.jsonList:
+                d = self.calculateTfIdf(d)
                 file.write(json.dumps(d))
                 file.write("\n")
             self.jsonList.clear()
@@ -184,9 +188,32 @@ class Merger:
         stringMetadata = json.dumps(metadata)
         return stringMetadata
 
-    #TODO : Calculate TF-IDF before adding a term in a dict on next function
-    def calculateTfIdf(self):
-        pass
+    def calculateTfIdf(self, line):
+        """
+        Calculate the tfidf of each term in the line
+        Returns the line with the tfidf values with the following format:
+        {
+            term: {
+                doc: ([positions], tfidf)
+            }
+        }
+        """
+
+        term, docs = list(line.items())[0]
+
+        df = len(docs)
+        idf = math.log(self.N/df, 10)
+
+        for doc, positions in docs.items():
+            tf = len(positions)
+            tfidf = (1 + math.log(tf)) * idf
+            line[term][doc] = (positions, tfidf)
+
+        return line
+        
+    def getNbLinesOfFile(self, fileName):
+        with open(fileName, 'r') as file:
+            return sum(1 for _ in file)
     
     #TODO Select in the index all the terms starting with the character. Maybe just work with letters here, and an "other" index 
     def cutIndexDependingOnLetters(self):
@@ -201,5 +228,6 @@ class Merger:
         pass
 
 if __name__ == "__main__":
-    merger = Merger("out.json", {"minimumTokenLength" : 1, "normalizeToLower" :True, "allowedCharactersFile":"../allowedCharacters.txt", "stopwordsFile":"../stopwords-en.txt"}, {"stemming":True})
-    merger.merge()
+    merger = Merger("", "out.json", {"minimumTokenLength" : 1, "normalizeToLower" :True, "allowedCharactersFile":"../allowedCharacters.txt", "stopwordsFile":"../stopwords-en.txt"}, {"stemming":True})
+    # merger.merge()
+    print(merger.calculateTfIdf({"ado": {"PMID:31442103": [46], "PMID:9428677": [30, 58, 75, 91, 106, 125]}}))
