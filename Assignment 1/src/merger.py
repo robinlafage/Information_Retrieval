@@ -47,7 +47,7 @@ class Merger:
             i += 1
     
         #On end, we split the index
-        self.cutIndexDependingOnCharacter()
+        self.cutIndexDependingOnLetters()
 
         #Not useful anymore
         # with open(self.outputFile, "a+") as file:
@@ -136,14 +136,14 @@ class Merger:
                     self.tempDict = {}
 
                 if len(self.jsonList) >= maxTerms:
-                    self.appendToJsonl(mergedFile)
+                    self.appendToJsonl(mergedFile, calculateTfIdf=True)
 
         if self.tempDict:
             self.appendToIndex(self.tempDict, mergedFile)
             self.tempDict = {}
 
         if self.jsonList:
-            self.appendToJsonl(mergedFile)
+            self.appendToJsonl(mergedFile, calculateTfIdf=True)
                 
     
     
@@ -172,10 +172,11 @@ class Merger:
         return res
 
 
-    def appendToJsonl(self, outputFile):
+    def appendToJsonl(self, outputFile, calculateTfIdf):
         with open(outputFile, "a+") as file:
             for d in self.jsonList:
-                d = self.calculateTfIdf(d)
+                if not d.get("metadata") and calculateTfIdf:
+                    d = self.calculateTfIdf(d)
                 file.write(json.dumps(d))
                 file.write("\n")
             self.jsonList.clear()
@@ -229,7 +230,7 @@ class Merger:
             line = indexFile.readline()
             while line != '' :
                 if i==nbLines :
-                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
                     i = 0
                 if newFile == True :
                     self.jsonList.append(json.loads(metadata))
@@ -242,7 +243,7 @@ class Merger:
                     self.jsonList.append(linejson)
                     i+=1
                 else :
-                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
                     i = 0
                     self.jsonList.append(json.loads(metadata))
                     characterToPut = token[0].lower()
@@ -250,7 +251,7 @@ class Merger:
                     i+=1   
                 line = indexFile.readline()
             if self.jsonList != [] :
-                self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
 
 
 if __name__ == "__main__":
