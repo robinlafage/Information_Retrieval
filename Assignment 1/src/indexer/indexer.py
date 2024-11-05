@@ -1,7 +1,7 @@
-from parser import *
-from tokenizer import *
-from stemmer import *
-from merger import *
+from indexer.parser import *
+from indexer.tokenizer import *
+from indexer.stemmer import *
+from indexer.merger import *
 import json
 
 class Indexer:

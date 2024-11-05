@@ -1,7 +1,7 @@
 # Group 02
 
 import argparse
-from indexer import *
+from indexer.indexer import *
 import time
 
 def main():
@@ -46,7 +46,11 @@ def readCommandLineArgs():
     indexer_parser.add_argument("--stemming", type=bool, default=True, help="To activate or not the stemming after tokenization", action=argparse.BooleanOptionalAction)
     
     searcher_parser = subparsers.add_parser("search", help="Searcher engine")
-    searcher_parser.add_argument("indexFile", type=str, help="File with the inverted index")
+    searcher_parser.add_argument("indexDirectory", type=str, help="Directory containing the index files")
+    searcher_parser.add_argument("-q", "--queryFile", type=str, help="File containing the queries")
+    searcher_parser.add_argument("-o", "--outputFile", type=str, help="File to save the results")
+    searcher_parser.add_argument("-k1", type=float, default=1.2, help="BM25 k1 parameter")
+    searcher_parser.add_argument("-b", type=float, default=0.75, help="BM25 b parameter")
 
     return argsParser
 
