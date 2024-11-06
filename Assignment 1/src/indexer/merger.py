@@ -12,7 +12,7 @@ class Merger:
         self.indexesDir = "../tmpIndexes"
         self.tokenizerOptions = tokenizerOptions
         self.stemmerOptions = stemmerOptions
-        self.N = self.getNbLinesOfFile(self.inputFile)
+        # self.N = self.getNbLinesOfFile(self.inputFile)
 
     def merge(self):
         files = self.getFilesFromDirectory(self.indexesDir)
@@ -177,8 +177,8 @@ class Merger:
     def appendToJsonl(self, outputFile, calculateTfIdf):
         with open(outputFile, "a+") as file:
             for d in self.jsonList:
-                if not d.get("metadata") and calculateTfIdf:
-                    d = self.calculateTfIdf(d)
+                # if not d.get("metadata") and calculateTfIdf:
+                #     d = self.calculateTfIdf(d)
                 file.write(json.dumps(d))
                 file.write("\n")
             self.jsonList.clear()
