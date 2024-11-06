@@ -23,6 +23,8 @@ class Searcher:
         tokenizer = Tokenizer(None, self.corpusInfos["metadata"]["minimumTokenLength"], self.corpusInfos["metadata"]["normalizeToLower"], self.corpusInfos["metadata"]["allowedCharactersFile"], self.corpusInfos["metadata"]["stopwordsFile"])
 
 
+        foundDocs = 0
+        totalDocs = 0
         with open(self.searcherOptions["queryFile"], 'r') as file:
             for line in file:
                 query = json.loads(line)
@@ -31,9 +33,12 @@ class Searcher:
                 self.scores = dict(sorted(self.scores.items(), key=lambda item: item[1], reverse=True))
                 self.scores = {k: self.scores[k] for k in list(self.scores)[:100]}
                 self.writeOutput(query)
-                self.checkScores(query)
+                a, b = self.checkScores(query)
+                foundDocs += a
+                totalDocs += b
                 self.scores = {}
 
+        print(f"\033[31m Total: {foundDocs} / {totalDocs} \033[0m")
 
     #TODO: test with stemming
     def searchQuery(self, query, N, avdl, tokenizer):
@@ -80,6 +85,8 @@ class Searcher:
                 foundDocs += 1
             
         print(f"\033[31m Found documents: {foundDocs} / {len(query['goldstandard_documents'])} \033[0m")
+
+        return foundDocs, len(query["goldstandard_documents"])
 
 
     def writeOutput(self, query):
