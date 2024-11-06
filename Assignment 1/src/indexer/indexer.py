@@ -18,6 +18,7 @@ class Indexer:
         self.buildPartialsIndexes()
         merger = Merger(self.inputFile, self.outputFile, self.tokenizerOptions, self.stemmerOptions)
         merger.merge()
+        self.getDocumentsLength()
 
 
     def buildPartialsIndexes(self):
@@ -121,8 +122,13 @@ class Indexer:
                     file.write(json.dumps({key: value}) + "\n")
 
 
-    #TODO: Modify this method to take into account tokenization rules
     def getDocumentsLength(self):
+        tokenizer = Tokenizer(None, 
+                              1, #We always count every words
+                              self.tokenizerOptions["normalizeToLower"], 
+                              self.tokenizerOptions["allowedCharactersFile"], 
+                              "") #We always count stopwords in the documents length
+
         totalWords = 0
         totalDocuments = 0
         outPutJson = {}
@@ -131,16 +137,30 @@ class Indexer:
         with open(self.inputFile, "r") as file:
             for line in file:
                 document = json.loads(line)
-                documentLen = len(document["text"].split())
+                documentContent = document["text"]
+                tokenizer.stringToTokenize = documentContent
+                tokens = tokenizer.tokenize()
+                documentLen = len(tokens)
                 documentsLength[document["doc_id"]] = documentLen
 
                 totalWords += documentLen
                 totalDocuments += 1
 
         avdl = totalWords / totalDocuments
+        outPutJson["metadata"] = self.defineMetadata()
         outPutJson["nbDocuments"] = totalDocuments
         outPutJson["avdl"] = avdl
         outPutJson["documentsLength"] = documentsLength
 
         with open("../indexes/documentsLength.json", "w") as file:
             file.write(json.dumps(outPutJson))
+
+
+    def defineMetadata(self):
+        metadata = {}
+        metadata["stemming"]=self.stemmerOptions["stemming"]
+        metadata["minimumTokenLength"]=self.tokenizerOptions["minimumTokenLength"]
+        metadata["normalizeToLower"]=self.tokenizerOptions["normalizeToLower"]
+        metadata["allowedCharactersFile"]=self.tokenizerOptions["allowedCharactersFile"]
+        metadata["stopwordsFile"]=self.tokenizerOptions["stopwordsFile"]
+        return metadata
