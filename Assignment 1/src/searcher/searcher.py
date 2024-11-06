@@ -1,6 +1,7 @@
 import json
 import math
 import nltk.stem.porter as stemmerLibrary
+from indexer.tokenizer import *
 
 class Searcher:
     def __init__(self, indexDirectory, outputFile, searcherOptions):
@@ -19,23 +20,30 @@ class Searcher:
         N = self.corpusInfos["nbDocuments"]
         avdl = self.corpusInfos["avdl"]
 
+        tokenizer = Tokenizer(None, self.corpusInfos["metadata"]["minimumTokenLength"], self.corpusInfos["metadata"]["normalizeToLower"], self.corpusInfos["metadata"]["allowedCharactersFile"], self.corpusInfos["metadata"]["stopwordsFile"])
+
+
         with open(self.searcherOptions["queryFile"], 'r') as file:
             for line in file:
                 query = json.loads(line)
                 print("Query: " + query["question"])
-                self.searchQuery(query, N, avdl)
+                self.searchQuery(query, N, avdl, tokenizer)
                 self.scores = dict(sorted(self.scores.items(), key=lambda item: item[1], reverse=True))
-                self.scores = json.dumps({k: self.scores[k] for k in list(self.scores)[:100]})
-                with open(self.outputFile, 'a') as file:
-                    file.write(self.scores + "\n")
+                self.scores = {k: self.scores[k] for k in list(self.scores)[:100]}
+                self.writeOutput(query)
                 self.checkScores(query)
                 self.scores = {}
 
 
-    #Modify to take into account tokenization and stemming rules
-    def searchQuery(self, query, N, avdl):
-        for term in query["question"].split():
-            term = term.lower()
+    #TODO: test with stemming
+    def searchQuery(self, query, N, avdl, tokenizer):
+        tokenizer.stringToTokenize = query["question"]
+        terms = tokenizer.tokenize()
+
+        for term in terms:
+            if self.corpusInfos["metadata"]["stemming"]:
+                term = stemmerLibrary.PorterStemmer().stem(term)
+
             try:
                 if term[-1] == "?":
                     term = term[:-1]
@@ -43,7 +51,7 @@ class Searcher:
                     for line in file:
                         jsonLine = json.loads(line)
                         if list(jsonLine.keys())[0] == term:
-                            # print(f"term found: {term}")
+                            print(f"term found: {term}")
                             self.calculateScore(jsonLine[term], N, avdl)
 
             except Exception as e:
@@ -71,7 +79,19 @@ class Searcher:
             if doc in self.scores:
                 foundDocs += 1
             
-        print(f"Found documents: {foundDocs} / {len(query['goldstandard_documents'])}")
+        print(f"\033[31m Found documents: {foundDocs} / {len(query['goldstandard_documents'])} \033[0m")
+
+
+    def writeOutput(self, query):
+        outputJson = {}
+
+        outputJson["id"] = query["query_id"]
+        outputJson["question"] = query["question"]
+        outputJson["retrieved_documents"] = list(self.scores.keys())
+
+        outputJson = json.dumps(outputJson)
+        with open(self.outputFile, 'a') as file:
+            file.write(outputJson + "\n")
 
 
 if __name__ == '__main__':
