@@ -119,3 +119,28 @@ class Indexer:
             with open(f"{self.outputDirectory}/indexPart{currentBloc}.jsonl", "w") as file:
                 for key, value in self.tempDict.items():
                     file.write(json.dumps({key: value}) + "\n")
+
+
+    #TODO: Modify this method to take into account tokenization rules
+    def getDocumentsLength(self):
+        totalWords = 0
+        totalDocuments = 0
+        outPutJson = {}
+
+        documentsLength = {}
+        with open(self.inputFile, "r") as file:
+            for line in file:
+                document = json.loads(line)
+                documentLen = len(document["text"].split())
+                documentsLength[document["doc_id"]] = documentLen
+
+                totalWords += documentLen
+                totalDocuments += 1
+
+        avdl = totalWords / totalDocuments
+        outPutJson["nbDocuments"] = totalDocuments
+        outPutJson["avdl"] = avdl
+        outPutJson["documentsLength"] = documentsLength
+
+        with open("../indexes/documentsLength.json", "w") as file:
+            file.write(json.dumps(outPutJson))
