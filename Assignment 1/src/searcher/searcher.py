@@ -2,6 +2,7 @@ import json
 import math
 import nltk.stem.porter as stemmerLibrary
 from indexer.tokenizer import *
+import time
 
 class Searcher:
     def __init__(self, indexDirectory, outputFile, searcherOptions):
@@ -12,7 +13,6 @@ class Searcher:
         self.corpusInfos = {}
 
     def search(self):
-        print("Searching...")
         
         with open("../indexes/documentsLength.json", 'r') as file:
             self.corpusInfos = json.load(file)
@@ -27,6 +27,8 @@ class Searcher:
         totalDocs = 0
         with open(self.searcherOptions["queryFile"], 'r') as file:
             for line in file:
+                start = time.time()
+
                 query = json.loads(line)
                 print("Query: " + query["question"])
                 self.searchQuery(query, N, avdl, tokenizer)
@@ -37,6 +39,8 @@ class Searcher:
                 foundDocs += a
                 totalDocs += b
                 self.scores = {}
+
+                print(f"\033[32m Time: {round((time.time() - start), 2)} seconds \033[0m")
 
         print(f"\033[31m Total: {foundDocs} / {totalDocs} \033[0m")
 
@@ -50,14 +54,13 @@ class Searcher:
                 term = stemmerLibrary.PorterStemmer().stem(term)
 
             try:
-                if term[-1] == "?":
-                    term = term[:-1]
                 with open(self.indexDirectory + "/index_by_character_" + term[0] + ".jsonl", 'r') as file:
                     for line in file:
                         jsonLine = json.loads(line)
                         if list(jsonLine.keys())[0] == term:
                             print(f"term found: {term}")
                             self.calculateScore(jsonLine[term], N, avdl)
+                            break
 
             except Exception as e:
                 print(f"erreur : {e}")
@@ -80,11 +83,18 @@ class Searcher:
 
     def checkScores(self, query):
         foundDocs = 0
+        rank = []
         for doc in query["goldstandard_documents"]:
-            if doc in self.scores:
-                foundDocs += 1
-            
-        print(f"\033[31m Found documents: {foundDocs} / {len(query['goldstandard_documents'])} \033[0m")
+            i = 0
+            for key in self.scores.keys():
+                i += 1
+                if doc == key:
+                    foundDocs += 1
+                    rank.append(i)
+                    break
+
+        rank.sort()
+        print(f"\033[31m Found documents: {foundDocs} / {len(query['goldstandard_documents'])}. Ranks : {rank} \033[0m")
 
         return foundDocs, len(query["goldstandard_documents"])
 
@@ -99,9 +109,3 @@ class Searcher:
         outputJson = json.dumps(outputJson)
         with open(self.outputFile, 'a') as file:
             file.write(outputJson + "\n")
-
-
-if __name__ == '__main__':
-    searcher = Searcher("indexDirectory", "outputFile", {"queryFile": "queryFile", "k1": 1.2, "b": 0.75, "maximumDocuments": 100})
-    # print(searcher.averageWordCount("../corpus/a.jsonl"))
-    # print(searcher.wordCount("../corpus/MEDLINE_2024_Baseline.jsonl", "PMID:36839181"))
