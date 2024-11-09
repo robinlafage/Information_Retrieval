@@ -22,7 +22,13 @@ class Searcher:
 
         tokenizer = Tokenizer(None, self.corpusInfos["metadata"]["minimumTokenLength"], self.corpusInfos["metadata"]["normalizeToLower"], self.corpusInfos["metadata"]["allowedCharactersFile"], self.corpusInfos["metadata"]["stopwordsFile"])
 
+        if self.searcherOptions["queryFile"]:
+            self.searchAllQueries(N, avdl, tokenizer)
+        else:
+            self.interactiveSearch(N, avdl, tokenizer)
+        
 
+    def searchAllQueries(self, N, avdl, tokenizer):
         foundDocs = 0
         totalDocs = 0
         with open(self.searcherOptions["queryFile"], 'r') as file:
@@ -43,6 +49,22 @@ class Searcher:
                 print(f"\033[32m Time: {round((time.time() - start), 2)} seconds \033[0m")
 
         print(f"\033[31m Total: {foundDocs} / {totalDocs} \033[0m")
+
+
+    def interactiveSearch(self, N, avdl, tokenizer):
+        id = 0
+        while True:
+            query = input("Enter your query: (type 'exit' to leave)\n")
+            if query == "exit":
+                break
+
+            query = {"question": query, "query_id": str(id)}
+            self.searchQuery(query, N, avdl, tokenizer)
+            self.scores = dict(sorted(self.scores.items(), key=lambda item: item[1], reverse=True))
+            self.scores = {k: self.scores[k] for k in list(self.scores)[:100]}
+            self.writeOutput(query)
+            self.scores = {}
+            id += 1
 
     #TODO: test with stemming
     def searchQuery(self, query, N, avdl, tokenizer):
