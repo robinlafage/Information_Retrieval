@@ -12,5 +12,7 @@ sudo apt install python3-pip
 
 Then you can download all the packages : 
 ```
-pip install nltk
+pip install nltk  
+pip install scikit-learn  
+pip install regex (à vérifier)
 ```

@@ -3,6 +3,7 @@ import math
 import nltk.stem.porter as stemmerLibrary
 from indexer.tokenizer import *
 import time
+from searcher.ndcgMetric import *
 
 class Searcher:
     def __init__(self, indexDirectory, outputFile, searcherOptions):
@@ -11,6 +12,7 @@ class Searcher:
         self.searcherOptions = searcherOptions
         self.scores = {}
         self.corpusInfos = {}
+        self.totalNdcg = 0
 
     def search(self):
         
@@ -31,6 +33,7 @@ class Searcher:
     def searchAllQueries(self, N, avdl, tokenizer):
         foundDocs = 0
         totalDocs = 0
+        i = 0
         with open(self.searcherOptions["queryFile"], 'r') as file:
             for line in file:
                 start = time.time()
@@ -45,10 +48,13 @@ class Searcher:
                 foundDocs += a
                 totalDocs += b
                 self.scores = {}
+                i += 1
 
                 print(f"\033[32m Time: {round((time.time() - start), 2)} seconds \033[0m")
 
+        print()
         print(f"\033[31m Total: {foundDocs} / {totalDocs} \033[0m")
+        print(f"\033[33m Average nDCG@10: {self.totalNdcg / i} \033[0m")
 
 
     def interactiveSearch(self, N, avdl, tokenizer):
@@ -117,6 +123,11 @@ class Searcher:
 
         rank.sort()
         print(f"\033[31m Found documents: {foundDocs} / {len(query['goldstandard_documents'])}. Ranks : {rank} \033[0m")
+
+        ndcgMetric = NDCG(None, None)
+        ndcg = ndcgMetric.calculateNdcg(list(self.scores.keys()), query["goldstandard_documents"], 10)
+        print(f"\033[33mnDCG@10: {ndcg}\033[0m")
+        self.totalNdcg += ndcg
 
         return foundDocs, len(query["goldstandard_documents"])
 
