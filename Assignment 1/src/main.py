@@ -3,6 +3,7 @@
 import argparse
 from indexer.indexer import *
 from searcher.searcher import *
+from searcher.ndcgMetric import *
 import time
 
 def main():
@@ -36,6 +37,9 @@ def main():
 
         searcher = Searcher(args.indexDirectory, args.outputFile, searcherOptions)
         searcher.search()
+
+        # ndcg = NDCG(args.queryFile, args.outputFile)
+        # ndcg.computeMetric()
     else:
         argsParser.print_help()
     
@@ -69,5 +73,6 @@ if __name__ == '__main__':
     start = time.time()
     main()
     end = time.time()
+    print(f"\033[35m Average time: {round(((end - start) / 100), 2)} seconds \033[0m")
     print(f"Execution time: {end - start} seconds - {(end - start) / 60} minutes")
 
