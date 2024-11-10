@@ -223,20 +223,15 @@ class Merger:
     
     #TODO Select in the index all the terms starting with the character. Maybe just work with letters here, and an "other" index 
     def cutIndexDependingOnLetters(self):
-        metadata = self.defineMetadata()
         characterToPut = ''
         nbLines = 10
         i = 0
-        newFile=True
         with open(self.outputFile, 'r') as indexFile:
             line = indexFile.readline()
             while line != '' :
                 if i==nbLines :
                     self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
                     i = 0
-                if newFile == True :
-                    self.jsonList.append(json.loads(metadata))
-                    newFile = False
                 linejson = json.loads(line)
                 token = list(linejson.keys())[0]
                 if characterToPut == '' :
@@ -247,7 +242,6 @@ class Merger:
                 else :
                     self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
                     i = 0
-                    self.jsonList.append(json.loads(metadata))
                     characterToPut = token[0].lower()
                     self.jsonList.append(linejson)   
                     i+=1   
