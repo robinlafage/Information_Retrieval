@@ -4,6 +4,7 @@ import nltk.stem.porter as stemmerLibrary
 from indexer.tokenizer import *
 import time
 from searcher.ndcgMetric import *
+from itertools import islice
 
 class Searcher:
     def __init__(self, indexDirectory, outputFile, searcherOptions):
@@ -72,10 +73,12 @@ class Searcher:
             self.scores = {}
             id += 1
 
-    #TODO: test with stemming
     def searchQuery(self, query, N, avdl, tokenizer):
         tokenizer.stringToTokenize = query["question"]
         terms = tokenizer.tokenize()
+        stepSize = 1000
+        indexSup = 0
+        found = False
 
         for term in terms:
             if self.corpusInfos["metadata"]["stemming"]:
@@ -83,12 +86,45 @@ class Searcher:
 
             try:
                 with open(self.indexDirectory + "/index_by_character_" + term[0] + ".jsonl", 'r') as file:
-                    for line in file:
+                    slice = list(islice(file, 0, None, stepSize))
+                    found=False
+                    for index, line in enumerate(slice) :
                         jsonLine = json.loads(line)
-                        if list(jsonLine.keys())[0] == term:
-                            print(f"term found: {term}")
+                        indexSup = index
+                        if list(jsonLine.keys())[0] == term :
+                            found = True
                             self.calculateScore(jsonLine[term], N, avdl)
                             break
+                        if list(jsonLine.keys())[0] > term :
+                            break
+                    else :
+                        file.seek(0)
+                        slice = list(islice(file, indexSup*stepSize, None, 1))
+                        for line in slice :
+                            jsonLine = json.loads(line)
+                            if list(jsonLine.keys())[0] == term :
+                                print(f"term found: {term}")
+                                found=True
+                                self.calculateScore(jsonLine[term], N, avdl)
+                                break
+                    if indexSup != 0 and not found :
+                        file.seek(0)
+                        slice = list(islice(file, (indexSup-1)*stepSize, indexSup*stepSize, 1))
+                        for line in slice :
+                            jsonLine = json.loads(line)
+                            if list(jsonLine.keys())[0] == term :
+                                print(f"term found: {term}")
+                                found = True
+                                self.calculateScore(jsonLine[term], N, avdl)
+                                break
+                    if not found : 
+                        print(f"\nNOT FOUND : {term}\n")
+                    # for line in file:
+                    #     jsonLine = json.loads(line)
+                    #     if list(jsonLine.keys())[0] == term:
+                    #         print(f"term found: {term}")
+                    #         self.calculateScore(jsonLine[term], N, avdl)
+                    #         break
 
             except Exception as e:
                 print(f"erreur : {e}")
