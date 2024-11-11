@@ -61,6 +61,8 @@ class Tokenizer:
         if token != "" \
            and not len(token) < self.minimumTokenLength\
            and token not in stopWords:
+            if normalizeToLowerCase :
+                token=token.lower()
             tokenList.append(token)
 
         return tokenList
