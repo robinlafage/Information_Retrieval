@@ -133,8 +133,8 @@ The fourth and last step is to calculate the document length and the total lengt
 
 The index files are in JSONL format, which allows iterating line by line without loading the entire file into memory, unlike the JSON format.
 
-We can see here the list of indexes : ![alt text](/img/index_list.png)
-Here is an exemple of the content of an index file : ![alt text](/img/index_content.png)
+We can see here the list of indexes : ![alt text](img/index_list.png)
+Here is an exemple of the content of an index file : ![alt text](img/index_content.png)
 
 ### Optimization techniques
 
