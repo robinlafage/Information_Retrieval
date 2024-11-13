@@ -62,7 +62,7 @@ def readCommandLineArgs():
     searcher_parser = subparsers.add_parser("search", help="Searcher engine")
     searcher_parser.add_argument("indexDirectory", type=str, help="Directory containing the index files")
     searcher_parser.add_argument("outputFile", type=str, help="File where the results are saved")
-    searcher_parser.add_argument("-q", "--queryFile", type=str, help="File containing the queries")
+    searcher_parser.add_argument("-q", "--queryFile", type=str, help="File containing the queries. If this option is not provided, the user can input the queries interactively")
     searcher_parser.add_argument("-k1", type=float, default=1.2, help="BM25 k1 parameter")
     searcher_parser.add_argument("-b", type=float, default=0.75, help="BM25 b parameter")
     searcher_parser.add_argument("-m", "--maximumDocuments", type=int, default=100, help="Maximum number of documents to return")
