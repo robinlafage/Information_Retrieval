@@ -20,10 +20,8 @@ class Indexer:
         if os.path.exists(self.temporaryIndexesDirectory):
             filesInTemporaryDirectory = [f for f in os.listdir(self.temporaryIndexesDirectory) if os.path.isfile(os.path.join(self.temporaryIndexesDirectory, f))]
         if len(filesInTemporaryDirectory) > 0 :
-            print('Suppressing all the files in the temporary directory')
             for file in filesInTemporaryDirectory :
                 os.remove(f"{self.temporaryIndexesDirectory}/{file}")
-            print('Finished suppressing all the files in the temporary directory')
         self.buildPartialsIndexes()
         merger = Merger(self.inputFile, self.outputDirectory, self.tokenizerOptions, self.stemmerOptions, self.temporaryIndexesDirectory)
         merger.merge()
