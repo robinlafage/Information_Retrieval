@@ -1,22 +1,5 @@
 # How to run the programm
 
-## Steps to install all dependencies :
-
-Firstly, install python version >= python3.8 : 
-```
-sudo apt install python3.10
-```
-
-Then, install python-pip : 
-```
-sudo apt install python3-pip
-```
-
-Then you can download all the packages : 
-```
-pip install -r requirements.txt
-```
-
 ## Indexer
 
 To run the indexer, you have to run the following command : 
