@@ -1,3 +1,5 @@
+# How to run the programm
+
 ## Steps to install all dependencies :
 
 Firstly, install python version >= python3.8 : 
@@ -14,8 +16,6 @@ Then you can download all the packages :
 ```
 pip install -r requirements.txt
 ```
-
-# How to run the programm
 
 ## Indexer
 
@@ -153,9 +153,39 @@ It is important to note that these times may vary depending on the computer laun
 
 # Searcher Engine
 
-### Implemented search algorithm
+## Implemented search algorithm
 
-### Optimization techniques
+We have implemented a BM25 ranking algorithm for the search engine. 
+
+### Formula BM25
+
+This algorithm is based on the following formula:
+$$
+\text{Score}(Q, D) = \sum_{i \in Q} \log{\frac{N}{df_i}} \cdot \frac{(k_1 + 1) \cdot tf_{i, D}}{k_1 \cdot ((1 - b) + b \cdot \frac{L_D}{L_{avg}}) + tf_{i, D}}
+$$
+Where:
+- $Q$: The query
+- $D$: The document
+- $N$: The total number of documents
+- $df_i$: The number of documents containing the term $i$
+- $tf_{i, D}$: The number of occurrences of term $i$ in document $D$
+- $L_D$: The length of document $D$
+- $L_{avg}$: The average document length
+- $k_1$ and $b$: Algorithm parameters (default values are $k_1 = 1.2$ and $b = 0.75$)
+
+### Implementation
+
+The search algorithm is implemented as follows:
+1. Read the first query from the query file (or the query entered by the user in the terminal).
+2. Tokenize the query to extract terms according to the same rules used for the indexer.
+3. For each term in the query, calculate the BM25 score for every document containing that term.
+4. Add the score obtained to the document's total score.
+5. Repeat steps 3 and 4 for every term in the query.
+6. Sort the documents in descending order by their total score and keep only the n firts, where n in configured by the user (100 by default).
+7. Write the results to the output file.
+8. Repeat steps 1 to 7 for each query.
+
+## Optimization techniques
 
 In order to reduce the time to search for a token, while not having to load the index in memory, we used some optimization techniques : 
 
@@ -164,7 +194,7 @@ In order to reduce the time to search for a token, while not having to load the 
 - The second major optimization is done during searching. In order to avoid looking at each line of the index to check if it is the right token, we simply read one line every thousand of line. If the token on this line is greater than our researched token, then we have a slice of 1000 lines in which it is fast enough to check each line until we reach our token. 
 By doing this, we reduce the average query processing time by **75%**. 
 
-### Average query processing time
+## Average query processing time
 
 Using the questions.jsonl file given with the subject, we have an average query time of **1 second**.
 It is important to note that this time may vary depending on the computer launching the searcher.
@@ -172,6 +202,8 @@ It is important to note that this time may vary depending on the computer launch
 # Ranking Metrics
 
 # Additional Information
+
+## General
 
 Here is the Command Line Interface help menus :
 ```
@@ -186,6 +218,52 @@ positional arguments:
 
 options:
   -h, --help      show this help message and exit
+```
+
+## Indexer
+
+Here is the help menu for the indexer :
+```
+usage: main.py index [-h] [-m MINIMUMTOKENLENGTH] [-s STOPWORDSFILE] [-a ALLOWEDCHARACTERSFILE]
+                     [--normalizeToLower | --no-normalizeToLower] [--stemming | --no-stemming]
+                     inputFile outputDirectory
+
+positional arguments:
+  inputFile             File to index
+  outputDirectory       Directory to save the indexes
+
+options:
+  -h, --help            show this help message and exit
+  -m MINIMUMTOKENLENGTH, --minimumTokenLength MINIMUMTOKENLENGTH
+                        Minimum token length to be indexed
+  -s STOPWORDSFILE, --stopwordsFile STOPWORDSFILE
+                        File containing stopwords
+  -a ALLOWEDCHARACTERSFILE, --allowedCharactersFile ALLOWEDCHARACTERSFILE
+                        File containing allowed characters
+  --normalizeToLower, --no-normalizeToLower
+                        To activate or not the normalization to lower case (default: True)
+  --stemming, --no-stemming
+                        To activate or not the stemming after tokenization (default: True)
+```
+
+## Searcher
+
+Here is the help menu for the searcher :
+```
+usage: main.py search [-h] [-q QUERYFILE] [-k1 K1] [-b B] [-m MAXIMUMDOCUMENTS] indexDirectory outputFile
+
+positional arguments:
+  indexDirectory        Directory containing the index files
+  outputFile            File where the results are saved
+
+options:
+  -h, --help            show this help message and exit
+  -q QUERYFILE, --queryFile QUERYFILE
+                        File containing the queries. If this option is not provided, the user can input the queries interactively
+  -k1 K1                BM25 k1 parameter
+  -b B                  BM25 b parameter
+  -m MAXIMUMDOCUMENTS, --maximumDocuments MAXIMUMDOCUMENTS
+                        Maximum number of documents to return
 ```
 
 
