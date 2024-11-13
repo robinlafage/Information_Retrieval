@@ -15,6 +15,46 @@ Then you can download all the packages :
 pip install -r requirements.txt
 ```
 
+# How to run the programm
+
+## Indexer
+
+To run the indexer, you have to run the following command : 
+```
+python3 src/main.py index [-h] [-m MINIMUMTOKENLENGTH] [-s STOPWORDSFILE] [-a ALLOWEDCHARACTERSFILE] [--normalizeToLower | --no-normalizeToLower] [--stemming | --no-stemming] inputFile outputDirectory
+```
+
+### Arguments
+- inputFile : The path to the file containing the corpus to index.
+- outputDirectory : The path to the directory where the index files will be written.
+
+### Options
+- -h, --help : Show help message and exit.
+- -m, --minimumTokenLength MINIMUMTOKENLENGTH : The minimum length of a token to be indexed. Default value is 1.
+- -s, --stopWordsFile STOPWORDSFILE : The path to the file containing the stop words. Default value is the file `stop_words.txt` in the root directory of the project.
+- -a, --allowedCharactersFile ALLOWEDCHARACTERSFILE : The path to the file containing the allowed characters. Default value is the file `allowed_characters.txt` in the root directory of the project.
+- --normalizeToLower, --no-normalizeToLower : Normalize or not all tokens to lowercase. Default value is True.
+- --stemming, --no-stemming : Stem or not all tokens. Default value is True.
+
+## Searcher
+
+To run the searcher, you have to run the following command : 
+```
+python3 src/main.py search [-h] [-q QUERYFILE] [-k1 K1] [-b B] [-m MAXIMUMDOCUMENTS] indexDirectory outputFile
+```
+
+### Arguments
+- indexDirectory : The path to the directory containing the index files.
+- outputFile : The path to the file where the search results will be written.
+
+### Options
+- -h, --help : Show help message and exit.
+- -q, --queryFile QUERYFILE : The path to the file containing the queries. If this option is not provided, the queries will be read from the standard input.
+- -k1 K1 : The k1 parameter of the BM25 ranking function. Default value is 1.2.
+- -b B : The b parameter of the BM25 ranking function. Default value is 0.75.
+- -m MAXIMUMDOCUMENTS : The maximum number of documents to return for each query. Default value is 100.
+
+
 # Indexer Engine
 
 ### SPIMI implementation

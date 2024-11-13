@@ -39,6 +39,14 @@ class NDCG:
         y_true = np.array([y_true])
         y_score = np.array([y_score])
 
-        ndcg = ndcg_score(y_true, y_score, k=k)
+        try:
+            ndcg = ndcg_score(y_true, y_score, k=k)
+        except:
+            ndcg = 0
         
         return ndcg
+    
+
+if __name__ == '__main__':
+    ndcg = NDCG("../questions.jsonl", "out.jsonl")
+    ndcg.computeMetric()
