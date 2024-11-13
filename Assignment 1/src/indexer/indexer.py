@@ -5,18 +5,26 @@ from indexer.merger import *
 import json
 
 class Indexer:
-    def __init__(self, inputFile, outputFile, tokenizerOptions, stemmerOptions):
+    def __init__(self, inputFile, outputDirectory, tokenizerOptions, stemmerOptions):
         self.inputFile = inputFile
-        self.outputFile = outputFile
+        self.outputDirectory = outputDirectory
         self.tokenizerOptions = tokenizerOptions
         self.stemmerOptions = stemmerOptions
         self.tempDict = {}
         self.tempDictAfterStemming = {}
-        self.outputDirectory = "../tmpIndexes"
+        self.temporaryIndexesDirectory = "../tmpIndexes"
 
     def buildIndex(self):
+        #Cleaning the temporaryIndexesDirectory before building the index
+        filesInTemporaryDirectory = None 
+        if os.path.exists(self.temporaryIndexesDirectory):
+            filesInTemporaryDirectory = [f for f in os.listdir(self.temporaryIndexesDirectory) if os.path.isfile(f)]
+        if len(filesInTemporaryDirectory) > 0 :
+            for file in filesInTemporaryDirectory :
+                os.remove(f"{self.temporaryIndexesDirectory}/{file}")
+
         self.buildPartialsIndexes()
-        merger = Merger(self.inputFile, self.outputFile, self.tokenizerOptions, self.stemmerOptions)
+        merger = Merger(self.inputFile, self.outputDirectory, self.tokenizerOptions, self.stemmerOptions, self.temporaryIndexesDirectory)
         merger.merge()
         self.getDocumentsLength()
 
@@ -108,16 +116,16 @@ class Indexer:
                 self.tempDict[originalToken][docId] = []
 
     def writeTempDictInDisk(self, currentBloc):
-        if not os.path.exists(self.outputDirectory):
-            os.mkdir(self.outputDirectory)
+        if not os.path.exists(self.temporaryIndexesDirectory):
+            os.mkdir(self.temporaryIndexesDirectory)
         if self.stemmerOptions["stemming"]:
             self.tempDictAfterStemming = dict(sorted(self.tempDictAfterStemming.items()))
-            with open(f"{self.outputDirectory}/indexPart{currentBloc}.jsonl", "w") as file:
+            with open(f"{self.temporaryIndexesDirectory}/indexPart{currentBloc}.jsonl", "w") as file:
                 for key, value in self.tempDictAfterStemming.items():
                     file.write(json.dumps({key: value}) + "\n")
         else:
             self.tempDict = dict(sorted(self.tempDict.items()))
-            with open(f"{self.outputDirectory}/indexPart{currentBloc}.jsonl", "w") as file:
+            with open(f"{self.temporaryIndexesDirectory}/indexPart{currentBloc}.jsonl", "w") as file:
                 for key, value in self.tempDict.items():
                     file.write(json.dumps({key: value}) + "\n")
 

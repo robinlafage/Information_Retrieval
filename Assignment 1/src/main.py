@@ -24,7 +24,7 @@ def main():
             "stemming" : args.stemming
         }
 
-        indexer = Indexer(args.inputFile, args.outputFile, tokenizerOptions, stemmerOptions)
+        indexer = Indexer(args.inputFile, args.outputDirectory, tokenizerOptions, stemmerOptions)
         indexer.buildIndex()
         
     elif args.command == "search":
@@ -50,18 +50,18 @@ def readCommandLineArgs():
 
     # Indexer parser
     indexer_parser = subparsers.add_parser("index", help="Build the inverted index")
-    indexer_parser.add_argument("inputFile", type=str, help="Files to index")
-    indexer_parser.add_argument("outputFile", type=str, help="File to save the index")
+    indexer_parser.add_argument("inputFile", type=str, help="File to index")
+    indexer_parser.add_argument("outputDirectory", type=str, help="Directory to save the indexes")
     indexer_parser.add_argument("-m", "--minimumTokenLength", type=int, default=1, help="Minimum token length to be indexed")
     indexer_parser.add_argument("-w","--stopwordsFile", type=str, default="../stopwords-en.txt", help="File containing stopwords")
-    indexer_parser.add_argument("-a", "--allowedCharactersFile", type=str, default="../allowedCharacters.txt", help="File containing characters to cut")
+    indexer_parser.add_argument("-a", "--allowedCharactersFile", type=str, default="../allowedCharacters.txt", help="File containing allowed characters")
     indexer_parser.add_argument("--normalizeToLower", type=bool, default=True, help="To activate or not the normalization to lower case", action=argparse.BooleanOptionalAction)
     indexer_parser.add_argument("--stemming", type=bool, default=True, help="To activate or not the stemming after tokenization", action=argparse.BooleanOptionalAction)
     
     # Searcher parser
     searcher_parser = subparsers.add_parser("search", help="Searcher engine")
     searcher_parser.add_argument("indexDirectory", type=str, help="Directory containing the index files")
-    searcher_parser.add_argument("outputFile", type=str, help="File to save the results")
+    searcher_parser.add_argument("outputFile", type=str, help="File where the results are saved")
     searcher_parser.add_argument("-q", "--queryFile", type=str, help="File containing the queries")
     searcher_parser.add_argument("-k1", type=float, default=1.2, help="BM25 k1 parameter")
     searcher_parser.add_argument("-b", type=float, default=0.75, help="BM25 b parameter")

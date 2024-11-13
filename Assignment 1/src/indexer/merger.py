@@ -4,21 +4,29 @@ import os
 import time
 
 class Merger:
-    def __init__(self, inputFile, outputFile, tokenizerOptions, stemmerOptions):
+    def __init__(self, inputFile, outputDirectory, tokenizerOptions, stemmerOptions, temporaryIndexesDirectory):
         self.inputFile = inputFile
-        self.outputFile = outputFile
+        self.outputDirectory = outputDirectory
         self.tempDict = {}
         self.jsonList = list()
-        self.indexesDir = "../tmpIndexes"
+        self.temporaryIndexesDir = temporaryIndexesDirectory
         self.tokenizerOptions = tokenizerOptions
         self.stemmerOptions = stemmerOptions
+        self.outputFile = 'output.jsonl'
         # self.N = self.getNbLinesOfFile(self.inputFile)
 
     def merge(self):
-        files = self.getFilesFromDirectory(self.indexesDir)
+        files = self.getFilesFromDirectory(self.jsonList)
         i = 0
-        if os.path.exists(self.outputFile):
-            os.remove(self.outputFile)
+        if not os.path.exists(self.outputDirectory):
+            os.mkdir(self.outputDirectory)
+            
+        #Cleaning the output directory
+        filesInOutputDir = self.getFilesFromDirectory(self.outputDirectory)
+        if len(filesInOutputDir) > 0 :
+            for file in filesInOutputDir :
+                os.remove(f"{self.outputDirectory}/{file}")
+
         if len(files) == 1 :
             with open("empty_file.jsonl", "w") as file :
                 files.append("empty_file.jsonl")
@@ -29,7 +37,7 @@ class Merger:
             file2 = files.pop(0)
             
             # Define a temporary file hosting the merge
-            mergedFile = f"{self.indexesDir}/mergedPart{i}.jsonl"  
+            mergedFile = f"{self.jsonList}/mergedPart{i}.jsonl"  
         
             # Call the merging function
             if len(files) == 0:
@@ -48,12 +56,6 @@ class Merger:
     
         #On end, we split the index
         self.cutIndexDependingOnLetters()
-        if os.path.exists(self.outputFile):
-            os.remove(self.outputFile)
-
-        #Not useful anymore
-        # with open(self.outputFile, "a+") as file:
-        #     file.write("}")
 
 
     def getFilesFromDirectory(self, directory):
@@ -138,14 +140,14 @@ class Merger:
                     self.tempDict = {}
 
                 if len(self.jsonList) >= maxTerms:
-                    self.appendToJsonl(mergedFile, calculateTfIdf=True)
+                    self.appendToJsonl(mergedFile)
 
         if self.tempDict:
             self.appendToIndex(self.tempDict, mergedFile)
             self.tempDict = {}
 
         if self.jsonList:
-            self.appendToJsonl(mergedFile, calculateTfIdf=True)
+            self.appendToJsonl(mergedFile)
                 
     
     
@@ -174,54 +176,19 @@ class Merger:
         return res
 
 
-    def appendToJsonl(self, outputFile, calculateTfIdf):
+    def appendToJsonl(self, outputFile):
         with open(outputFile, "a+") as file:
             for d in self.jsonList:
-                # if not d.get("metadata") and calculateTfIdf:
-                #     d = self.calculateTfIdf(d)
                 file.write(json.dumps(d))
                 file.write("\n")
             self.jsonList.clear()
 
-    def defineMetadata(self):
-        metadata = {}
-        metadata["metadata"]={}
-        metadata["metadata"]["stemming"]=self.stemmerOptions["stemming"]
-        metadata["metadata"]["minimumTokenLength"]=self.tokenizerOptions["minimumTokenLength"]
-        metadata["metadata"]["normalizeToLower"]=self.tokenizerOptions["normalizeToLower"]
-        metadata["metadata"]["allowedCharactersFile"]=self.tokenizerOptions["allowedCharactersFile"]
-        metadata["metadata"]["stopwordsFile"]=self.tokenizerOptions["stopwordsFile"]
-        stringMetadata = json.dumps(metadata)
-        return stringMetadata
-
-    def calculateTfIdf(self, line):
-        """
-        Calculate the tfidf of each term in the line
-        Returns the line with the tfidf values with the following format:
-        {
-            term: {
-                doc: ([positions], tfidf)
-            }
-        }
-        """
-
-        term, docs = list(line.items())[0]
-
-        df = len(docs)
-        idf = math.log(self.N/df, 10)
-
-        for doc, positions in docs.items():
-            tf = len(positions)
-            tfidf = (1 + math.log(tf)) * idf
-            line[term][doc] = (positions, tfidf)
-
-        return line
+    
         
     def getNbLinesOfFile(self, fileName):
         with open(fileName, 'r') as file:
             return sum(1 for _ in file)
     
-    #TODO Select in the index all the terms starting with the character. Maybe just work with letters here, and an "other" index 
     def cutIndexDependingOnLetters(self):
         characterToPut = ''
         nbLines = 10
@@ -230,7 +197,7 @@ class Merger:
             line = indexFile.readline()
             while line != '' :
                 if i==nbLines :
-                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
+                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
                     i = 0
                 linejson = json.loads(line)
                 token = list(linejson.keys())[0]
@@ -240,17 +207,11 @@ class Merger:
                     self.jsonList.append(linejson)
                     i+=1
                 else :
-                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
+                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
                     i = 0
                     characterToPut = token[0].lower()
                     self.jsonList.append(linejson)   
                     i+=1   
                 line = indexFile.readline()
             if self.jsonList != [] :
-                self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl", calculateTfIdf=False)
-
-
-if __name__ == "__main__":
-    merger = Merger("", "out.json", {"minimumTokenLength" : 1, "normalizeToLower" :True, "allowedCharactersFile":"../allowedCharacters.txt", "stopwordsFile":"../stopwords-en.txt"}, {"stemming":True})
-    # merger.merge()
-    print(merger.calculateTfIdf({"ado": {"PMID:31442103": [46], "PMID:9428677": [30, 58, 75, 91, 106, 125]}}))
+                self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
