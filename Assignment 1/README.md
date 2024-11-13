@@ -133,8 +133,8 @@ The fourth and last step is to calculate the document length and the total lengt
 
 The index files are in JSONL format, which allows iterating line by line without loading the entire file into memory, unlike the JSON format.
 
-We can see here the list of indexes : ![alt text](image-1.png)
-Here is an exemple of the content of an index file : ![alt text](image-2.png)
+We can see here the list of indexes : ![alt text](/img/index_list.png)
+Here is an exemple of the content of an index file : ![alt text](/img/index_content.png)
 
 ### Optimization techniques
 
@@ -145,7 +145,7 @@ Another optimization is for merging the partial indexes. In order accelerate thi
 ### Indexing time
 
 The following times include the calculation of the various documents length and total length, which are used for the searcher and take about 1 minute and 30 seconds, and the split of the index which is about 1 minute.
-- With the configuration using the minimal token length of 1 and stemming the total time comes to **TODO minutes**.
+- With the configuration using the minimal token length of 1 and stemming the total time comes to **19 minutes**.
 - With the configuration using the minimal token length of 1 and no stemming the total time comes to **17 minutes**.
 - Without the optimization techniques told earlier, we had came up with times over **45 minutes** for the indexing. This shows the importance of optimizations.
 
@@ -196,10 +196,26 @@ By doing this, we reduce the average query processing time by **75%**.
 
 ## Average query processing time
 
-Using the questions.jsonl file given with the subject, we have an average query time of **1 second**.
+Using the questions.jsonl file given with the subject, we have an average query time of **1.2 second**.
 It is important to note that this time may vary depending on the computer launching the searcher.
 
-# Ranking Metrics
+## Ranking Metrics
+
+We managed to test multiple different configuration of the index and the searcher in order to compare the searching score : 
+- With no stemming, a minimum token length of 1, k1=1.2 and b=0.75 the average nDCG@10 score is 0.674
+- With stemming, a minimum token length of 3, k1=1.2 and b=0.75 the average nDCG@10 score is 0.679
+- With stemming, a minimum token length of 1, k1=1.2 and b=0.7 the average nDCG@10 score is 0.680
+- With stemming, a minimum token length of 1, k1=1.2 and b=0.8 the average nDCG@10 score is 0.679
+- With stemming, a minimum token length of 1, k1=1.2 and b=0.75 the average nDCG@10 score is 0.682
+- With stemming, a minimum token length of 1, k1=1.0 and b=0.75 the average nDCG@10 score is 0.686
+- With stemming, a minimum token length of 1, k1=0.8 and b=0.75 the average nDCG@10 score is 0.689
+- With stemming, a minimum token length of 1, k1=0.65 and b=0.75 the average nDCG@10 score is 0.684
+
+This shows that the stemming helps to improve the average score, even if sometimes it can lead to false positive. Also a good way of having a better score is by modifying the k1 value, with a best point at k1=0.8.
+
+## Missing features
+
+One missing feature is the tf-idf. Since it is not mandatory to do it, we made the choice to base our searcher only on the BM25 ranking algorithm. 
 
 # Additional Information
 
@@ -268,3 +284,29 @@ options:
 
 
 # Conclusion
+
+### Strengths
+
+An important strength the searcher returns answers quickly enough for an user to not be bored waiting for the results. This is an important thing because a searcher is an algorithm meant to be used by an human operator. 
+
+Another strength is the format of the index. By making it multiple jsonl files, it permits to fasten the searching while only slightly increasing computation time during indexing. 
+
+### Weaknesses 
+
+Our implementation still have some weaknesses, especially on the searcher which have a decent but not perfect score. It could be improved by adding tf-idf or by using another ranking algorithm that returns a better ranking.
+
+An important weakness is that the indexer will work well only in English. This is due to the algorithm used for the stemming, Porter algorithm, that works best in English. 
+
+### Areas of improvement 
+
+In the case of the indexer, an area of improvement could be the stemming phase. By saving the stemmed tokens, we could avoid stemming the same token multiple times across the different partial indexes. 
+
+A possible area of improvement could be using a different method to stem the tokens. Using a dictionary could permit to achieve a better stemming at the cost of computation time. This could be possible only by assuming the dictionary is complete enough to overperform the Porter algorithm. Using another algorithm more adapted to the tokens language could be another area of improvement. 
+
+### Key challenges
+
+The biggest challenge we encountered during the indexing process was to optimize the process in order to take as little time as possible to create the index.
+Another challenge of the indexer was to create the index without loading everything in memory. This challenge was quickly addressed, but led to some optimizations needed to reduce the computation time.
+
+In the searcher, one challenge was finding the best possible combination of parameters in the index in order to have the best possible final nDCG@10 average score in the searcher.
+The biggest challenge for the searcher was to find a way to search for a term in an index without having to go through each line of the index, and without loading it in memory. This led to both of the optimization techniques used in the searcher.

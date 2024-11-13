@@ -73,6 +73,10 @@ if __name__ == '__main__':
     start = time.time()
     main()
     end = time.time()
-    print(f"\033[35m Average time: {round(((end - start) / 100), 2)} seconds \033[0m")
+
+    argsParser = readCommandLineArgs()
+    args = argsParser.parse_args()
+    if args.command == "search":
+        print(f"\033[35m Average time: {round(((end - start) / 100), 2)} seconds \033[0m")
     print(f"Execution time: {end - start} seconds - {(end - start) / 60} minutes")
 
