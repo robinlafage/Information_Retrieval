@@ -91,7 +91,7 @@ The first step is to build partial indexes. The algorithm for this step is as fo
 #### Step 2
 
 The second step is to merge the partial indexes. To achieve this, we chose to implement a 2-way merge, which means we merge partial indexes two at a time, then merge the resulting indexes two at a time, and so on until only one index remains, as shown in the following diagram:
-![2-wayMerge](/img/2way_merge.png)
+![2-wayMerge](img/2way_merge.png)
 
 The algorithm for merging two temporary indexes is as follows:
 
@@ -160,9 +160,9 @@ We have implemented a BM25 ranking algorithm for the search engine.
 ### Formula BM25
 
 This algorithm is based on the following formula:
-$$
-\text{Score}(Q, D) = \sum_{i \in Q} \log{\frac{N}{df_i}} \cdot \frac{(k_1 + 1) \cdot tf_{i, D}}{k_1 \cdot ((1 - b) + b \cdot \frac{L_D}{L_{avg}}) + tf_{i, D}}
-$$
+
+$\text{Score}(Q, D) = \sum_{i \in Q} \log{\frac{N}{df_i}} \cdot \frac{(k_1 + 1) \cdot tf_{i, D}}{k_1 \cdot ((1 - b) + b \cdot \frac{L_D}{L_{avg}}) + tf_{i, D}}$
+
 Where:
 - $Q$: The query
 - $D$: The document
