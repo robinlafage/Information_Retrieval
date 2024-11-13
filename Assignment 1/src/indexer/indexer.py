@@ -12,7 +12,7 @@ class Indexer:
         self.stemmerOptions = stemmerOptions
         self.tempDict = {}
         self.tempDictAfterStemming = {}
-        self.temporaryIndexesDirectory = "../tmpIndexes"
+        self.temporaryIndexesDirectory = "tmpIndexes"
 
     def buildIndex(self):
         #Cleaning the temporaryIndexesDirectory before building the index
