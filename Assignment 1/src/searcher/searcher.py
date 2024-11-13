@@ -43,7 +43,7 @@ class Searcher:
                 print("Query: " + query["question"])
                 self.searchQuery(query, N, avdl, tokenizer)
                 self.scores = dict(sorted(self.scores.items(), key=lambda item: item[1], reverse=True))
-                self.scores = {k: self.scores[k] for k in list(self.scores)[:100]}
+                self.scores = {k: self.scores[k] for k in list(self.scores)[:10]}
                 self.writeOutput(query)
                 a, b = self.checkScores(query)
                 foundDocs += a
