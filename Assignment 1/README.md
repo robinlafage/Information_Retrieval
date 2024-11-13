@@ -40,8 +40,6 @@ python3 src/main.py search [-h] [-q QUERYFILE] [-k1 K1] [-b B] [-m MAXIMUMDOCUME
 
 # Indexer Engine
 
-### SPIMI implementation
-
 ### Tokenizer
 
 The tokenizer is using two input files : 
