@@ -9,13 +9,13 @@ class Merger:
         self.outputDirectory = outputDirectory
         self.tempDict = {}
         self.jsonList = list()
-        self.temporaryIndexesDir = temporaryIndexesDirectory
+        self.temporaryIndexesDirectory = temporaryIndexesDirectory
         self.tokenizerOptions = tokenizerOptions
         self.stemmerOptions = stemmerOptions
         self.outputFile = 'output.jsonl'
 
     def merge(self):
-        files = self.getFilesFromDirectory(self.temporaryIndexesDir)
+        files = self.getFilesFromDirectory(self.temporaryIndexesDirectory)
         i = 0
         if not os.path.exists(self.outputDirectory):
             os.mkdir(self.outputDirectory)
@@ -39,7 +39,7 @@ class Merger:
             file2 = files.pop(0)
             
             # Define a temporary file hosting the merge
-            mergedFile = f"{self.jsonList}/mergedPart{i}.jsonl"  
+            mergedFile = f"{self.temporaryIndexesDirectory}/mergedPart{i}.jsonl"  
         
             # Call the merging function
             if len(files) == 0:

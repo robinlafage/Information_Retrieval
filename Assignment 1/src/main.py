@@ -45,7 +45,7 @@ def main():
     
     
 def readCommandLineArgs():
-    argsParser = argparse.ArgumentParser(description='A Information Retrieval System for the first assignment of the RI course at Universidade de Aveiro')
+    argsParser = argparse.ArgumentParser(description='An Information Retrieval System for the first assignment of the RI course at Universidade de Aveiro')
     subparsers = argsParser.add_subparsers(dest="command", help="Available commands")
 
     # Indexer parser
@@ -53,7 +53,7 @@ def readCommandLineArgs():
     indexer_parser.add_argument("inputFile", type=str, help="File to index")
     indexer_parser.add_argument("outputDirectory", type=str, help="Directory to save the indexes")
     indexer_parser.add_argument("-m", "--minimumTokenLength", type=int, default=1, help="Minimum token length to be indexed")
-    indexer_parser.add_argument("-w","--stopwordsFile", type=str, default="../stopwords-en.txt", help="File containing stopwords")
+    indexer_parser.add_argument("-s","--stopwordsFile", type=str, default="../stopwords-en.txt", help="File containing stopwords")
     indexer_parser.add_argument("-a", "--allowedCharactersFile", type=str, default="../allowedCharacters.txt", help="File containing allowed characters")
     indexer_parser.add_argument("--normalizeToLower", type=bool, default=True, help="To activate or not the normalization to lower case", action=argparse.BooleanOptionalAction)
     indexer_parser.add_argument("--stemming", type=bool, default=True, help="To activate or not the stemming after tokenization", action=argparse.BooleanOptionalAction)
