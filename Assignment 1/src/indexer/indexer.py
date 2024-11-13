@@ -159,7 +159,7 @@ class Indexer:
         outPutJson["avdl"] = avdl
         outPutJson["documentsLength"] = documentsLength
 
-        with open("../indexes/documentsLength.json", "w") as file:
+        with open(f"{self.outputDirectory}/documentsLength.json", "w") as file:
             file.write(json.dumps(outPutJson))
 
 

@@ -59,6 +59,8 @@ class Merger:
         #On end, we split the index
         self.cutIndexDependingOnLetters()
 
+        os.remove(self.outputFile)
+
 
     def getFilesFromDirectory(self, directory):
         try:
@@ -199,7 +201,7 @@ class Merger:
             line = indexFile.readline()
             while line != '' :
                 if i==nbLines :
-                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                    self.appendToJsonl(f"{self.outputDirectory}/index_by_character_{characterToPut}.jsonl")
                     i = 0
                 linejson = json.loads(line)
                 token = list(linejson.keys())[0]
@@ -209,11 +211,11 @@ class Merger:
                     self.jsonList.append(linejson)
                     i+=1
                 else :
-                    self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                    self.appendToJsonl(f"{self.outputDirectory}/index_by_character_{characterToPut}.jsonl")
                     i = 0
                     characterToPut = token[0].lower()
                     self.jsonList.append(linejson)   
                     i+=1   
                 line = indexFile.readline()
             if self.jsonList != [] :
-                self.appendToJsonl(f"../indexes/index_by_character_{characterToPut}.jsonl")
+                self.appendToJsonl(f"{self.outputDirectory}/index_by_character_{characterToPut}.jsonl")

@@ -17,7 +17,7 @@ class Searcher:
 
     def search(self):
         
-        with open("../indexes/documentsLength.json", 'r') as file:
+        with open(f"{self.indexDirectory}/documentsLength.json", 'r') as file:
             self.corpusInfos = json.load(file)
 
         N = self.corpusInfos["nbDocuments"]
