@@ -13,13 +13,15 @@ class Merger:
         self.tokenizerOptions = tokenizerOptions
         self.stemmerOptions = stemmerOptions
         self.outputFile = 'output.jsonl'
-        # self.N = self.getNbLinesOfFile(self.inputFile)
 
     def merge(self):
-        files = self.getFilesFromDirectory(self.jsonList)
+        files = self.getFilesFromDirectory(self.temporaryIndexesDir)
         i = 0
         if not os.path.exists(self.outputDirectory):
             os.mkdir(self.outputDirectory)
+        
+        if os.path.exists(self.outputFile):
+            os.remove(self.outputFile)
             
         #Cleaning the output directory
         filesInOutputDir = self.getFilesFromDirectory(self.outputDirectory)
