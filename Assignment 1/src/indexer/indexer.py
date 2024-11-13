@@ -19,7 +19,10 @@ class Indexer:
         filesInTemporaryDirectory = None 
         if os.path.exists(self.temporaryIndexesDirectory):
             filesInTemporaryDirectory = [f for f in os.listdir(self.temporaryIndexesDirectory) if os.path.isfile(os.path.join(self.temporaryIndexesDirectory, f))]
-        if len(filesInTemporaryDirectory) > 0 :
+        else:
+            os.mkdir(self.temporaryIndexesDirectory)
+            filesInTemporaryDirectory = []
+        if len(filesInTemporaryDirectory) > 0:
             for file in filesInTemporaryDirectory :
                 os.remove(f"{self.temporaryIndexesDirectory}/{file}")
         self.buildPartialsIndexes()
