@@ -22,7 +22,7 @@ class Searcher:
 
         N = self.corpusInfos["nbDocuments"]
         avdl = self.corpusInfos["avdl"]
-
+        print(self.corpusInfos["metadata"])
         tokenizer = Tokenizer(None, self.corpusInfos["metadata"]["minimumTokenLength"], self.corpusInfos["metadata"]["normalizeToLower"], self.corpusInfos["metadata"]["allowedCharactersFile"], self.corpusInfos["metadata"]["stopwordsFile"])
 
         if self.searcherOptions["queryFile"]:

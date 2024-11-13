@@ -1,6 +1,0 @@
-Checksums of both files, verify with md5sum to confirm that you have the last versions.
-
-Updated at 30/09/2024
-
-d353b1f05235f788650a1bea9ec8a94d  MEDLINE_2024_Baseline.jsonl.gz
-d993fe580e83988b14d555a6d84ba543  questions.jsonl
