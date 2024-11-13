@@ -74,6 +74,16 @@ class Merger:
             return []
 
     def merge2Indexes(self, file1, file2, mergedFile, final):
+        """
+        Merge two indexes into one.
+
+        Args:
+            file1: the first index file.
+            file2: the second index file
+            mergedFile: the output file
+            final: whether this is the final merge or not : if it is, the output will be a json file, otherwise it will be a jsonl file (not used anymore).
+        """
+
         nbLines = 10000
         maxTerms = 1000
 

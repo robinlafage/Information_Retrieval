@@ -31,8 +31,8 @@ python3 src/main.py index [-h] [-m MINIMUMTOKENLENGTH] [-s STOPWORDSFILE] [-a AL
 ### Options
 - -h, --help : Show help message and exit.
 - -m, --minimumTokenLength MINIMUMTOKENLENGTH : The minimum length of a token to be indexed. Default value is 1.
-- -s, --stopWordsFile STOPWORDSFILE : The path to the file containing the stop words. Default value is the file `stop_words.txt` in the root directory of the project.
-- -a, --allowedCharactersFile ALLOWEDCHARACTERSFILE : The path to the file containing the allowed characters. Default value is the file `allowed_characters.txt` in the root directory of the project.
+- -s, --stopWordsFile STOPWORDSFILE : The path to the file containing the stop words. Default value is None (no stop words).
+- -a, --allowedCharactersFile ALLOWEDCHARACTERSFILE : The path to the file containing the allowed characters. Default value is None (only letters are allowed).
 - --normalizeToLower, --no-normalizeToLower : Normalize or not all tokens to lowercase. Default value is True.
 - --stemming, --no-stemming : Stem or not all tokens. Default value is True.
 
@@ -71,9 +71,67 @@ When the tokenizer is registering a new token, it checks if it has to be in lowe
 
 The stemming of the tokens is not handled by the tokenizer in a process of optimization.
 
+### SPIMI algorithm
+
+We implemented a SPIMI (Single Pass In Memory Indexing) algorithm for constructing the inverted index. This algorithm is used to build the inverted index while utilizing a limited amount of memory.  
+
+#### Step 1 
+
+The first step is to build partial indexes. The algorithm for this step is as follows:
+
+1. We start with an empty dictionary that will hold the partial index currently being constructed.
+2. Read a document from the corpus file.
+3. Tokenize the line into a list of tokens.
+4. If the token is not in the dictionary, add it as a key with a list containing the token's position in the document as its value.
+5. If the token is already in the dictionary, add the token's position in the document to the list of positions associated with this token.
+6. Repeat steps 2 to 5 for the next documents in the corpus.
+7. When the dictionary size exceeds a certain threshold, sort the dictionary alphabetically, write the partial index to a file, and clear the dictionary.
+8. Repeat steps 2 to 7 until all documents in the corpus have been processed.
+
+#### Step 2
+
+The second step is to merge the partial indexes. To achieve this, we chose to implement a 2-way merge, which means we merge partial indexes two at a time, then merge the resulting indexes two at a time, and so on until only one index remains, as shown in the following diagram:
+![2-wayMerge](/img/2way_merge.png)
+
+The algorithm for merging two temporary indexes is as follows:
+
+1. **Initialization**:
+Read a block containing the first terms of each temporary index.
+
+2. **Term comparison:**
+Compare the first term of each block:
+- Case 1: If the two terms are identical:  
+Merge their associated position lists.
+Write the merged term into the temporary index.
+- Case 2: Otherwise:  
+Take the smallest term (lexicographically) and write it into the temporary index.
+
+3. **Advancing within blocks:**
+If a term has been taken, read the next term from the corresponding index.
+If the terms were identical, advance in both blocks.
+
+4. **Switching blocks:**
+If a block is fully processed, load the next block from the corresponding index.
+
+5. **Partial writing:**
+If the total number of merged terms exceeds a predefined threshold:
+- Write the temporary index to a file.
+- Clear the temporary index to free up memory.
+
+6. **End of the algorithm:**
+Repeat steps 2 to 5 until all terms from both temporary indexes have been processed.
+
+#### Step 3
+
+The third step is to split the index. This step is necessary to optimize the search process. The index is split into multiple files based on the first character of the terms. This way, when searching for a term, we only need to search in the index file corresponding to the first character of the term, which reduces the search time.
+
+#### Step 4
+
+The fourth and last step is to calculate the document length and the total length of each document. This information is used to calculate the BM25 score during the search process. It is stored in a file named `documentLengths.json`. This file is also used to store metadata about the index : stemming or not, minimal token length, normalization to lowercase or not, allowed characters and stop words.
+
 ### Index files
 
-The index file is firstly written in a big jsonl file. It permits to iterate over each line without having to load the full index in memory. Using this process, we then split the index in smaller indexes depending on the first letter of each token. With this process, we have an index for each character of the allowed character file. It permits to access each token more easily in the searcher. 
+The index files are in JSONL format, which allows iterating line by line without loading the entire file into memory, unlike the JSON format.
 
 We can see here the list of indexes : ![alt text](image-1.png)
 Here is an exemple of the content of an index file : ![alt text](image-2.png)
@@ -87,7 +145,7 @@ Another optimization is for merging the partial indexes. In order accelerate thi
 ### Indexing time
 
 The following times include the calculation of the various documents length and total length, which are used for the searcher and take about 1 minute and 30 seconds, and the split of the index which is about 1 minute.
-- With the configuration using the minimal token length of 1 and stemming the total time comes to ** minutes**.
+- With the configuration using the minimal token length of 1 and stemming the total time comes to **TODO minutes**.
 - With the configuration using the minimal token length of 1 and no stemming the total time comes to **17 minutes**.
 - Without the optimization techniques told earlier, we had came up with times over **45 minutes** for the indexing. This shows the importance of optimizations.
 
@@ -116,5 +174,19 @@ It is important to note that this time may vary depending on the computer launch
 # Additional Information
 
 Here is the Command Line Interface help menus :
+```
+usage: main.py [-h] {index,search} ...
+
+An Information Retrieval System for the first assignment of the RI course at Universidade de Aveiro
+
+positional arguments:
+  {index,search}  Available commands
+    index         Build the inverted index
+    search        Searcher engine
+
+options:
+  -h, --help      show this help message and exit
+```
+
 
 # Conclusion
