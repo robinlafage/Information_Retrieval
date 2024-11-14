@@ -183,14 +183,14 @@ It is important to note that this time may vary depending on the computer launch
 ## Ranking Metrics
 
 We managed to test multiple different configuration of the index and the searcher in order to compare the searching score : 
-- With no stemming, a minimum token length of 1, k1=1.2 and b=0.75 the average nDCG@10 score is 0.674
-- With stemming, a minimum token length of 3, k1=1.2 and b=0.75 the average nDCG@10 score is 0.679
-- With stemming, a minimum token length of 1, k1=1.2 and b=0.7 the average nDCG@10 score is 0.680
-- With stemming, a minimum token length of 1, k1=1.2 and b=0.8 the average nDCG@10 score is 0.679
-- With stemming, a minimum token length of 1, k1=1.2 and b=0.75 the average nDCG@10 score is 0.682
-- With stemming, a minimum token length of 1, k1=1.0 and b=0.75 the average nDCG@10 score is 0.686
-- With stemming, a minimum token length of 1, k1=0.8 and b=0.75 the average nDCG@10 score is 0.689
-- With stemming, a minimum token length of 1, k1=0.65 and b=0.75 the average nDCG@10 score is 0.684
+- With **no stemming**, a minimum token length of **1**, **k1=1.2** and **b=0.75** the average nDCG@10 score is **0.674**
+- With **stemming**, a minimum token length of **3**, **k1=1.2** and **b=0.75** the average nDCG@10 score is **0.679**
+- With **stemming**, a minimum token length of **1**, **k1=1.2** and **b=0.7** the average nDCG@10 score is **0.680**
+- With **stemming**, a minimum token length of **1**, **k1=1.2** and **b=0.8** the average nDCG@10 score is **0.679**
+- With **stemming**, a minimum token length of **1**, **k1=1.2** and **b=0.75** the average nDCG@10 score is **0.682**
+- With **stemming**, a minimum token length of **1**, **k1=1.0** and **b=0.75** the average nDCG@10 score is **0.686**
+- With **stemming**, a minimum token length of **1**, **k1=0.8** and **b=0.75** the average nDCG@10 score is **0.689**
+- With **stemming**, a minimum token length of **1**, **k1=0.65** and **b=0.75** the average nDCG@10 score is **0.684**
 
 This shows that the stemming helps to improve the average score, even if sometimes it can lead to false positive. Also a good way of having a better score is by modifying the k1 value, with a best point at k1=0.8.
 
