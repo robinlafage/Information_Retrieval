@@ -15,8 +15,3 @@ class Stemmer:
                 tokenAfterStemming = token
             tokenListAfterStemming.append([token, tokenAfterStemming])
         return tokenListAfterStemming
-
-if __name__ == "__main__" :
-    stemmer = Stemmer(["I", "showed", "these", "off", "of", "this"])
-    tokens = stemmer.stem()
-    print(str(tokens))
