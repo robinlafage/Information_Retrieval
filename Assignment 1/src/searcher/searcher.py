@@ -49,6 +49,8 @@ class Searcher:
                 totalDocs += b
                 self.scores = {}
                 i += 1
+        
+        print(f"\033[33m Average nDCG@10: {self.totalNdcg / i} \033[0m")
 
 
     def interactiveSearch(self, N, avdl, tokenizer):
