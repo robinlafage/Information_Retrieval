@@ -66,18 +66,3 @@ class Tokenizer:
             tokenList.append(token)
 
         return tokenList
-
-if __name__ == "__main__" :
-    stringToTokenize = "ff fffff fff[Vitalizing public health activities through community assessment: A report of the Committee on Public Health Nursing 2014-2017].\n\nObjectives\u3000This report aims to present the community assessment model developed by the Committee on Public Health Nursing (6th term) of the Japanese Association of Public Health. This new model was designed such that it could be applied to a broad range of public health activities. It aims at theorizing public health nurses' practice-based knowledge and sharing it among other public health professionals.Methods\u3000The model was developed during seven committee meetings held from October 2014 to September 2017. In the first step, we brainstormed the definition and methods of community assessment and constructed a framework for a literature review. In the second step, information on theories, research, and practice relevant to community assessment was reviewed based on this framework. In the third step, the community assessment model was developed based on the results of the literature review and the practice experience of the committee members. In the last step, we examined the applicability of this model to the practice of occupational health and public health administration.Project activities\u3000We defined community assessment as the \"skills and methods based on applied science that drive Plan-Do-Check-Action (PDCA) cycles in every activity that aims at achieving a better quality of life (QOL).\" We further classified community assessment into two types; comprehensive assessment and targeted assessment. The model underlined that community assessment was a continuous and developmental process that occurs throughout every stage of the PDCA cycle, and that it was oriented toward improving the QOL of community residents. This model also purported that the empirical and scientific intuition, and ethical sensitivity of assessors were among the key determinants of assessment quality.Conclusion\u3000The model on community assessment developed in the present study based on the empirical knowledge of public health nurses could be applied to all types of public health activities in communities."
-    normalizeToLowerCase = False
-    minimumTokenLength = 3
-    allowedCharactersPath="../cuttingWordsV2.txt"
-    stopwordsPath = "../stopwords-en.txt"
-    tokenizer = Tokenizer(stringToTokenize, 
-                            minimumTokenLength,
-                            normalizeToLowerCase,
-                            allowedCharactersPath,
-                            stopwordsPath)
-    tokens = tokenizer.tokenize()
-    print(str(tokens))
-    

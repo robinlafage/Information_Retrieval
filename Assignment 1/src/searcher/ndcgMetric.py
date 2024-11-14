@@ -24,7 +24,6 @@ class NDCG:
                 relevant_set = set(query["goldstandard_documents"])
 
                 ndcg = self.calculateNdcg(results, relevant_set, k)
-                print(f"nDCG@{k}: {ndcg}")
                 totalNdcg += ndcg
                 i += 1
 
@@ -46,7 +45,3 @@ class NDCG:
         
         return ndcg
     
-
-if __name__ == '__main__':
-    ndcg = NDCG("../questions.jsonl", "out.jsonl")
-    ndcg.computeMetric()
