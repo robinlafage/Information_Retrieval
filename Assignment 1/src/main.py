@@ -37,8 +37,9 @@ def main():
         searcher = Searcher(args.indexDirectory, args.outputFile, searcherOptions)
         searcher.search()
 
-        # ndcg = NDCG(args.queryFile, args.outputFile)
-        # ndcg.computeMetric()
+        ndcg = NDCG(args.queryFile, args.outputFile)
+        averageNdcg = ndcg.computeMetric()
+        print(f"Average nDCG@10: {averageNdcg}")
     else:
         argsParser.print_help()
     

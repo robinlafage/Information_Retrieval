@@ -16,6 +16,9 @@ class Searcher:
         self.totalNdcg = 0
 
     def search(self):
+        """
+        Search for the queries (from a file or from user input) in the index
+        """
         
         with open(f"{self.indexDirectory}/documentsLength.json", 'r') as file:
             self.corpusInfos = json.load(file)
@@ -31,29 +34,34 @@ class Searcher:
         
 
     def searchAllQueries(self, N, avdl, tokenizer):
-        foundDocs = 0
-        totalDocs = 0
-        i = 0
+        """
+        Search for all the queries in the query file
+
+        Args:
+            N (int): Number of documents in the corpus
+            avdl (float): Average document length
+            tokenizer (Tokenizer): Tokenizer object
+        """
         with open(self.searcherOptions["queryFile"], 'r') as file:
             for line in file:
-                start = time.time()
-
                 query = json.loads(line)
                 print("Query: " + query["question"])
                 self.searchQuery(query, N, avdl, tokenizer)
                 self.scores = dict(sorted(self.scores.items(), key=lambda item: item[1], reverse=True))
                 self.scores = {k: self.scores[k] for k in list(self.scores)[:self.searcherOptions["maximumDocuments"]]}
                 self.writeOutput(query)
-                a, b = self.checkScores(query)
-                foundDocs += a
-                totalDocs += b
                 self.scores = {}
-                i += 1
-        
-        print(f"\033[33m Average nDCG@10: {self.totalNdcg / i} \033[0m")
 
 
     def interactiveSearch(self, N, avdl, tokenizer):
+        """
+        Search for queries interactively
+
+        Args:
+            N (int): Number of documents in the corpus
+            avdl (float): Average document length
+            tokenizer (Tokenizer): Tokenizer object
+        """
         id = 0
         while True:
             query = input("Enter your query: (type 'exit' to leave)\n")
@@ -69,6 +77,15 @@ class Searcher:
             id += 1
 
     def searchQuery(self, query, N, avdl, tokenizer):
+        """
+        Search for one query in the index
+
+        Args:
+            query (dict): Query to search
+            N (int): Number of documents in the corpus
+            avdl (float): Average document length
+            tokenizer (Tokenizer): Tokenizer object
+        """
         tokenizer.stringToTokenize = query["question"]
         terms = tokenizer.tokenize()
         stepSize = 1000
@@ -117,6 +134,15 @@ class Searcher:
 
 
     def calculateScore(self, line, N, avdl):
+        """
+        Calculate the document score for a query term
+
+        Args:
+            line (dict): Line of the index
+            N (int): Number of documents in the corpus
+            avdl (float): Average document length
+        """
+
         k1 = self.searcherOptions["k1"]
         b = self.searcherOptions["b"]
         df = len(line)
@@ -130,28 +156,14 @@ class Searcher:
                 self.scores[doc] = score
 
 
-    def checkScores(self, query):
-        foundDocs = 0
-        rank = []
-        for doc in query["goldstandard_documents"]:
-            i = 0
-            for key in self.scores.keys():
-                i += 1
-                if doc == key:
-                    foundDocs += 1
-                    rank.append(i)
-                    break
-
-        rank.sort()
-
-        ndcgMetric = NDCG(None, None)
-        ndcg = ndcgMetric.calculateNdcg(list(self.scores.keys()), query["goldstandard_documents"], 10)
-        self.totalNdcg += ndcg
-
-        return foundDocs, len(query["goldstandard_documents"])
-
-
     def writeOutput(self, query):
+        """
+        Write the query results in the output file
+
+        Args:
+            query (dict): Query treated
+        """
+        
         outputJson = {}
 
         outputJson["id"] = query["query_id"]

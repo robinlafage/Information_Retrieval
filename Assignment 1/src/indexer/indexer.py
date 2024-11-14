@@ -15,6 +15,10 @@ class Indexer:
         self.temporaryIndexesDirectory = "tmpIndexes"
 
     def buildIndex(self):
+        """
+        Builds the inverted index from the input file
+        """
+
         #Cleaning the temporaryIndexesDirectory before building the index
         filesInTemporaryDirectory = None 
         if os.path.exists(self.temporaryIndexesDirectory):
@@ -32,6 +36,9 @@ class Indexer:
 
 
     def buildPartialsIndexes(self):
+        """
+        Builds the partial indexes from the input file
+        """
         blocSize = 10000
         i = 0
         currentBloc = 0
@@ -77,7 +84,13 @@ class Indexer:
 
 
     def buildDictionary(self, tokens, docId):
+        """
+        Builds the temporary dictionary with the tokens and the corresponding docId
 
+        Args:
+            tokens (list): list of tokens
+            docId (int): document id
+        """
         i = 0
         for tok in tokens:
             if tok not in self.tempDict:
@@ -118,6 +131,13 @@ class Indexer:
                 self.tempDict[originalToken][docId] = []
 
     def writeTempDictInDisk(self, currentBloc):
+        """
+        Writes the temporary dictionary in the disk
+
+        Args:
+            currentBloc (int): current bloc number
+        """
+
         if not os.path.exists(self.temporaryIndexesDirectory):
             os.mkdir(self.temporaryIndexesDirectory)
         if self.stemmerOptions["stemming"]:
@@ -133,6 +153,9 @@ class Indexer:
 
 
     def getDocumentsLength(self):
+        """
+        Calculates the number of documents, length of each document, the average document length, and writes it in a json file. Write also the metadata in the json file.
+        """
         tokenizer = Tokenizer(None, 
                               1, #We always count every words
                               self.tokenizerOptions["normalizeToLower"], 
@@ -167,6 +190,12 @@ class Indexer:
 
 
     def defineMetadata(self):
+        """
+        Defines the metadata of the index
+
+        Returns:
+            dict: metadata of the index
+        """
         metadata = {}
         metadata["stemming"]=self.stemmerOptions["stemming"]
         metadata["minimumTokenLength"]=self.tokenizerOptions["minimumTokenLength"]
