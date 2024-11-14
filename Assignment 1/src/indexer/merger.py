@@ -15,6 +15,10 @@ class Merger:
         self.outputFile = 'output.jsonl'
 
     def merge(self):
+        """
+        Given the temporary indexes directory, this function merges all the partial indexes.
+        When all the partial indexes are merged, the file outputFile is created.
+        """
         files = self.getFilesFromDirectory(self.temporaryIndexesDirectory)
         i = 0
         if not os.path.exists(self.outputDirectory):
@@ -29,6 +33,8 @@ class Merger:
             for file in filesInOutputDir :
                 os.remove(f"{self.outputDirectory}/{file}")
 
+        #If we only have 1 file, then we create an empty one in order to merge it with the first one.
+        #This is made to make sure we enter in the while loop without letting any file unmerged.
         if len(files) == 1 :
             with open("empty_file.jsonl", "w") as file :
                 files.append("empty_file.jsonl")
@@ -63,6 +69,15 @@ class Merger:
 
 
     def getFilesFromDirectory(self, directory):
+        """
+        Given a directory, this function return a list of the files of the directory
+
+        Args:
+            directory (string): directory path (absolute or relative)
+
+        Returns:
+            [string]: list of the files of the directory
+        """
         try:
             all_items = os.listdir(directory)
             
@@ -149,48 +164,35 @@ class Merger:
                         i1 += 1
                         i2 += 1
 
-                if len(self.tempDict) >= maxTerms:
-                    self.appendToIndex(self.tempDict, mergedFile)
-                    self.tempDict = {}
-
                 if len(self.jsonList) >= maxTerms:
                     self.appendToJsonl(mergedFile)
 
-        if self.tempDict:
-            self.appendToIndex(self.tempDict, mergedFile)
-            self.tempDict = {}
-
         if self.jsonList:
             self.appendToJsonl(mergedFile)
-                
-    
-    
-    def appendToIndex(self, tmpDict, outputFile):
-        with open(outputFile, "a+") as file:
-            if file.tell() == 0:
-                file.write("{")
-            else:
-                file.seek(file.tell() - 1)
-                file.write(",")
-
-            for key, dict2 in tmpDict.items():
-                file.write(f"\"{key}\":{{")
-                for i, (key2, value) in enumerate(dict2.items()):
-                    file.write(f"\"{key2}\":{value}")
-                    if i < len(dict2) - 1:
-                        file.write(",")
-                file.write("}")
-                if list(tmpDict.keys())[-1] != key:
-                    file.write(",")
 
 
     def merge2Dicts(self, d1, d2, term):
+        """Given 2 dictionaries and a key, this function merge their values for this key.
+
+        Args:
+            d1 (dict): First dictionary
+            d2 (dict): Second dictionary
+            term (string): Key to merge 
+
+        Returns:
+            dict: Result of the merge
+        """
         res = d1.copy()
         res[term].update(d2[term])
         return res
 
 
     def appendToJsonl(self, outputFile):
+        """This function append a json list into a jsonl file
+
+        Args:
+            outputFile (string): Path of the file in which the jsonl will be written
+        """
         with open(outputFile, "a+") as file:
             for d in self.jsonList:
                 file.write(json.dumps(d))
@@ -198,18 +200,18 @@ class Merger:
             self.jsonList.clear()
 
     
-        
-    def getNbLinesOfFile(self, fileName):
-        with open(fileName, 'r') as file:
-            return sum(1 for _ in file)
-    
     def cutIndexDependingOnLetters(self):
+        """
+        This function has for objective to split the index depending on the first letter of each token.
+        This permits to fasten the searcher.
+        """
         characterToPut = ''
-        nbLines = 10
+        nbLines = 10000
         i = 0
         with open(self.outputFile, 'r') as indexFile:
             line = indexFile.readline()
             while line != '' :
+                #If we arrived at the maximum number of lines in memory, then we write out in the file
                 if i==nbLines :
                     self.appendToJsonl(f"{self.outputDirectory}/index_by_character_{characterToPut}.jsonl")
                     i = 0
@@ -217,9 +219,12 @@ class Merger:
                 token = list(linejson.keys())[0]
                 if characterToPut == '' :
                     characterToPut = token[0].lower()
+                #If the first letter of the token is the same as the character to put, then we add the json line into the list to write
                 if token[0].lower() == characterToPut :
                     self.jsonList.append(linejson)
                     i+=1
+                #If the first letter of the token is not the same as the character to put, it means we are going to the next index.
+                #This is possible because the index is sorted.
                 else :
                     self.appendToJsonl(f"{self.outputDirectory}/index_by_character_{characterToPut}.jsonl")
                     i = 0
@@ -227,5 +232,6 @@ class Merger:
                     self.jsonList.append(linejson)   
                     i+=1   
                 line = indexFile.readline()
+            #At the end of the loop, if the list isn't empty we write it in the appropriate file before ending the function
             if self.jsonList != [] :
                 self.appendToJsonl(f"{self.outputDirectory}/index_by_character_{characterToPut}.jsonl")
