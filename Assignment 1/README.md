@@ -4,7 +4,7 @@
 
 To run the indexer, you have to run the following command : 
 ```
-python3 src/main.py index [-h] [-m MINIMUMTOKENLENGTH] [-s STOPWORDSFILE] [-a ALLOWEDCHARACTERSFILE] [--normalizeToLower | --no-normalizeToLower] [--stemming | --no-stemming] inputFile outputDirectory
+python3 src/main.py index inputFile outputDirectory [-h] [-m MINIMUMTOKENLENGTH] [-s STOPWORDSFILE] [-a ALLOWEDCHARACTERSFILE] [--normalizeToLower | --no-normalizeToLower] [--stemming | --no-stemming]
 ```
 
 ### Arguments
@@ -23,7 +23,7 @@ python3 src/main.py index [-h] [-m MINIMUMTOKENLENGTH] [-s STOPWORDSFILE] [-a AL
 
 To run the searcher, you have to run the following command : 
 ```
-python3 src/main.py search [-h] [-q QUERYFILE] [-k1 K1] [-b B] [-m MAXIMUMDOCUMENTS] indexDirectory outputFile
+python3 src/main.py search indexDirectory outputFile [-h] [-q QUERYFILE] [-k1 K1] [-b B] [-m MAXIMUMDOCUMENTS]
 ```
 
 ### Arguments
@@ -72,6 +72,7 @@ The first step is to build partial indexes. The algorithm for this step is as fo
 #### Step 2
 
 The second step is to merge the partial indexes. To achieve this, we chose to implement a 2-way merge, which means we merge partial indexes two at a time, then merge the resulting indexes two at a time, and so on until only one index remains, as shown in the following diagram:
+
 ![2-wayMerge](img/2way_merge.png)
 
 The algorithm for merging two temporary indexes is as follows:
