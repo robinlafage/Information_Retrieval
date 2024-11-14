@@ -64,7 +64,7 @@ class Merger:
     
         #On end, we split the index
         self.cutIndexDependingOnLetters()
-        os.remove(self.temporaryIndexesDirectory)
+        os.rmdir(self.temporaryIndexesDirectory)
         os.remove(self.outputFile)
 
 

@@ -6,7 +6,7 @@
 cd src
 
 # To run the indexer
-python3 main.py index ../MEDLINE_2024_Baseline.jsonl ../indexes/ -s ../stopwords-en.txt -c ../allowedCharacters.txt
+python3 main.py index ../MEDLINE_2024_Baseline.jsonl ../indexes/ -s ../stopwords-en.txt -a ../allowedCharacters.txt
 
 # To run the searcher on a question file 
 python3 main.py search -q ../questions.jsonl ../indexes/ ../results.jsonl
