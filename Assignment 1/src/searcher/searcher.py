@@ -22,7 +22,6 @@ class Searcher:
 
         N = self.corpusInfos["nbDocuments"]
         avdl = self.corpusInfos["avdl"]
-        print(self.corpusInfos["metadata"])
         tokenizer = Tokenizer(None, self.corpusInfos["metadata"]["minimumTokenLength"], self.corpusInfos["metadata"]["normalizeToLower"], self.corpusInfos["metadata"]["allowedCharactersFile"], self.corpusInfos["metadata"]["stopwordsFile"])
 
         if self.searcherOptions["queryFile"]:
@@ -50,12 +49,6 @@ class Searcher:
                 totalDocs += b
                 self.scores = {}
                 i += 1
-
-                print(f"\033[32m Time: {round((time.time() - start), 2)} seconds \033[0m")
-
-        print()
-        print(f"\033[31m Total: {foundDocs} / {totalDocs} \033[0m")
-        print(f"\033[33m Average nDCG@10: {self.totalNdcg / i} \033[0m")
 
 
     def interactiveSearch(self, N, avdl, tokenizer):
@@ -103,7 +96,6 @@ class Searcher:
                         for line in slice :
                             jsonLine = json.loads(line)
                             if list(jsonLine.keys())[0] == term :
-                                print(f"term found: {term}")
                                 found=True
                                 self.calculateScore(jsonLine[term], N, avdl)
                                 break
@@ -113,21 +105,12 @@ class Searcher:
                         for line in slice :
                             jsonLine = json.loads(line)
                             if list(jsonLine.keys())[0] == term :
-                                print(f"term found: {term}")
                                 found = True
                                 self.calculateScore(jsonLine[term], N, avdl)
                                 break
-                    if not found : 
-                        print(f"\nNOT FOUND : {term}\n")
-                    # for line in file:
-                    #     jsonLine = json.loads(line)
-                    #     if list(jsonLine.keys())[0] == term:
-                    #         print(f"term found: {term}")
-                    #         self.calculateScore(jsonLine[term], N, avdl)
-                    #         break
 
             except Exception as e:
-                print(f"erreur : {e}")
+                print(f"Error : {e}")
 
 
 
@@ -158,11 +141,9 @@ class Searcher:
                     break
 
         rank.sort()
-        print(f"\033[31m Found documents: {foundDocs} / {len(query['goldstandard_documents'])}. Ranks : {rank} \033[0m")
 
         ndcgMetric = NDCG(None, None)
         ndcg = ndcgMetric.calculateNdcg(list(self.scores.keys()), query["goldstandard_documents"], 10)
-        print(f"\033[33mnDCG@10: {ndcg}\033[0m")
         self.totalNdcg += ndcg
 
         return foundDocs, len(query["goldstandard_documents"])
