@@ -1,10 +1,10 @@
 import torch
 
 class CNNInteractionBasedModel(torch.nn.Module):
-    def __init__(self, vocab_size):
+    def __init__(self, vocab_size, embedding_matrix):
         super().__init__()
         self.vocab_size = vocab_size
-        self.embedd = torch.nn.Embedding(vocab_size, 5)
+        self.embedding_layer = torch.nn.Embedding.from_pretrained(embedding_matrix, freeze=True)
         self.conv = torch.nn.Conv2d(1, 32, 3)  # Conv2D: input channels = 1, output channels = 32, kernel_size = 3
         self.pool = torch.nn.MaxPool2d(3)      # Pooling with kernel size = 3
         self.global_pool = torch.nn.AdaptiveMaxPool2d((1, 1))  # Global Max Pooling to reduce to fixed size
@@ -18,8 +18,8 @@ class CNNInteractionBasedModel(torch.nn.Module):
         query_tensor = torch.tensor(query).unsqueeze(0)  # Shape: [1, seq_len]
         document_tensor = torch.tensor(document).unsqueeze(0)
 
-        query_embedd = self.embedd(query_tensor).unsqueeze(1)  # Shape: [1, 1, seq_len, embedding_dim]
-        document_embedd = self.embedd(document_tensor).unsqueeze(1)
+        query_embedd = self.embedding_layer(query_tensor).unsqueeze(1)  # Shape: [1, 1, seq_len, embedding_dim]
+        document_embedd = self.embedding_layer(document_tensor).unsqueeze(1)
 
         query_conv = self.conv(query_embedd)
         document_conv = self.conv(document_embedd)
