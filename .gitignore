@@ -28,3 +28,6 @@ replay_pid*
 *pycache*
 *.pyc
 env/
+
+#GloVe embeddings files
+glove*
