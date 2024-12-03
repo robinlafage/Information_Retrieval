@@ -27,3 +27,4 @@ replay_pid*
 #pycache
 *pycache*
 *.pyc
+env/
