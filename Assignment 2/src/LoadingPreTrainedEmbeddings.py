@@ -1,7 +1,9 @@
 import torch
+import time
 
 class LoadingPreTrainedEmbeddings:
     def load_glove_embeddings(self, glove_file_path):
+        start = time.time()
         embeddings_index = {}
         with open(glove_file_path, encoding='utf-8') as f:
             for line in f:
@@ -9,6 +11,8 @@ class LoadingPreTrainedEmbeddings:
                 word = values[0]
                 vector = torch.tensor([float(v) for v in values[1:]], dtype=torch.float32)
                 embeddings_index[word] = vector
+        end = time.time()
+        print(f"Read in { end - start }")
         return embeddings_index
 
     def create_glove_matrix(self, words, embeddings_index, embedding_dim):
@@ -33,20 +37,3 @@ class LoadingPreTrainedEmbeddings:
         else:
             matrix = torch.empty((0, embedding_dim), dtype=torch.float32)  # Cas où aucun mot n'a d'embedding
         return vocab, matrix
-    
-    # def create_glove_matrix_from_all_words(embeddings_index, embedding_dim):
-    #     vocab = {}  # Dictionnaire des mots mappés à des indices
-    #     matrix = []  # Liste des vecteurs
-        
-    #     for idx, (word, vector) in enumerate(embeddings_index.items()):
-    #         if word in embeddings_index:
-    #             vocab[word] = idx  # Mapper chaque mot à son index
-    #             matrix.append(vector)
-    #         else : 
-    #             print(f'Missing : {word}')
-        
-    #     if matrix:
-    #         matrix = torch.stack(matrix)  # Crée un tensor de dimension [len(words), embedding_dim]
-    #     else:
-    #         matrix = torch.empty((0, embedding_dim), dtype=torch.float32)  # Cas où aucun mot n'a d'embedding
-    #     return vocab, matrix
