@@ -1,7 +1,6 @@
-import torch
 import json
-import os
 import random
+import torch
 
 class SimpleDataset(torch.utils.data.Dataset):
     def __init__(self, questionFile, questionsRankedFile, medlineFile, tokenizer):
@@ -37,7 +36,7 @@ class SimpleDataset(torch.utils.data.Dataset):
                 break
 
         # Get negatives
-
+        
         number_documents = len(self.medlineLines)
         index = random.randint(0, number_documents - 1)
         negative_document = json.loads(self.medlineLines[index])
@@ -48,18 +47,19 @@ class SimpleDataset(torch.utils.data.Dataset):
             index = random.randint(0, number_documents - 1)
             negative_document = json.loads(self.medlineLines[index])
             negative_id = negative_document["doc_id"]
-            negative_text = negative_document["text"]
+            negative_text = negative_document["text"]        
 
         # Chose random 1/2
 
         if random.randint(0, 1) == 0:
-            document_id = positive_id
+            document_id = positive_id 
             document_text = positive_text
         else  :
             document_id = negative_id
             document_text = negative_text
 
         # Tokenize the texts
+        print(document_text)
         question_token_ids = self.tokenizer(question_text)
         document_token_ids = self.tokenizer(document_text)
 
