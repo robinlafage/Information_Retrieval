@@ -1,0 +1,119 @@
+import torch
+import json
+import os
+import random
+
+class SimpleDataset(torch.utils.data.Dataset):
+    def __init__(self, questionFile, questionsRankedFile, medlineFile, tokenizer):
+        super().__init__()
+        with open(questionFile, 'r') as f:
+            self.questionLines = f.readlines()
+        with open(questionsRankedFile, 'r') as f:
+            self.questionsRankedLines = f.readlines()
+        with open(medlineFile, 'r') as f:
+            self.medlineLines = f.readlines()
+        self.tokenizer = tokenizer
+        # load your data here
+
+    def __len__(self):
+        return len(self.questionLines)
+
+    def __getitem__(self, idx):
+        question = self.questionLines[idx]
+        question = json.loads(question)
+        question_id = question["query_id"]
+        question_text = question["question"]
+        goldstandard_documents = question["goldstandard_documents"]
+
+        # Get positives
+
+        number_goldstandard_documents = len(goldstandard_documents)
+        index = random.randint(0, number_goldstandard_documents - 1)
+        positive_id = goldstandard_documents[index]
+        for line in self.medlineLines:
+            line = json.loads(line)
+            if line["doc_id"] == positive_id:
+                positive_text = line["text"]
+                break
+
+        # Get negatives
+
+        number_documents = len(self.medlineLines)
+        index = random.randint(0, number_documents - 1)
+        negative_document = json.loads(self.medlineLines[index])
+        negative_id = negative_document["doc_id"]
+        negative_text = negative_document["text"]
+
+        while negative_id in goldstandard_documents:
+            index = random.randint(0, number_documents - 1)
+            negative_document = json.loads(self.medlineLines[index])
+            negative_id = negative_document["doc_id"]
+            negative_text = negative_document["text"]
+
+        # Chose random 1/2
+
+        if random.randint(0, 1) == 0:
+            document_id = positive_id
+            document_text = positive_text
+        else  :
+            document_id = negative_id
+            document_text = negative_text
+
+        # Tokenize the texts
+        question_token_ids = self.tokenizer(question_text)
+        document_token_ids = self.tokenizer(document_text)
+
+        # get the sample corresponding to index "idx"
+        return {
+            "question_id":question_id,
+            "document_id":document_id,
+            "question_token_ids": question_token_ids,
+            "document_token_ids": document_token_ids,
+        }
+
+
+def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_document_tokens):
+  def collate_fn(batch):
+    """
+    batch : list of samples from the dataset
+
+    The gold is to pad the question and the document to a uniform size "standard size"
+    you can assume max_number_of_question_tokens and max_number_of_document_tokens as the
+    maximum values allow within the batch or you can compute yourself a dynamic value based on
+    the largest sample in the batch.
+
+    The question_id and document_id can not be tensors since they are not feed to the model
+
+    returns: tensor or a dictionary of tensors.
+    """
+
+    question_token_ids = []
+    document_token_ids = []
+    question_ids = []
+    document_ids = []
+
+    for sample in batch:
+        question = sample["question"]
+        document = sample["document"]
+        question_id = sample["question_id"]
+        document_id = sample["document_id"]
+
+        qTokens = tokenizer(question)
+        dTokens = tokenizer(document)
+
+        question_token_ids.append(qTokens)
+        document_token_ids.append(dTokens)
+
+        question_ids.append(question_id)
+        document_ids.append(document_id)
+
+    padded_question_token_ids = torch.nn.utils.rnn.pad_sequence(question_token_ids, batch_first=True, padding_value=0)
+    padded_document_token_ids = torch.nn.utils.rnn.pad_sequence(document_token_ids, batch_first=True, padding_value=0)
+
+    return {
+            "question_token_ids": padded_question_token_ids,
+            "document_token_ids": padded_document_token_ids,
+            "question_id": question_ids,
+            "document_id": document_ids,
+        }
+  return collate_fn
