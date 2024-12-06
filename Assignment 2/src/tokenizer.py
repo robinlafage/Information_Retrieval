@@ -14,7 +14,7 @@ class Tokenizer:
         terms = list(filter(None, terms))
         for i in range(self.padding_size):
           if i < len(terms):
-            if terms[i] in self.token_to_id :
+            if terms[i].lower() in self.token_to_id :
               tokenIds.append(self.token_to_id[terms[i].lower()])
             else : 
               tokenIds.append(self.token_to_id["<UNK>"])

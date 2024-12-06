@@ -1,6 +1,8 @@
 from tokenizer import Tokenizer
 from CNNInteractionBasedModel import CNNInteractionBasedModel
 from LoadingPreTrainedEmbeddings import LoadingPreTrainedEmbeddings
+import torch
+from simpleDataset import SimpleDataset, build_collate_fn
 
 
 def main():
@@ -16,7 +18,7 @@ def main():
 
     # Exemple : charger un fichier
     loadingPreTrainedEmbeddings = LoadingPreTrainedEmbeddings()
-    glove_file = "../glove.6B.50d.txt"  # Chemin vers votre fichier .txt
+    glove_file = "../glove/glove.6B.50d.txt"  # Chemin vers votre fichier .txt
     embeddings_index = loadingPreTrainedEmbeddings.load_glove_embeddings(glove_file)
 
 
@@ -42,6 +44,23 @@ def main():
     document_ids2 = tokenizer(document2)
 
     model(query_ids2, document_ids2)
+
+
+    ds = SimpleDataset(questionFile="data/questions.json",
+                       documentFile="data/documents.json",
+                       medlineFile="data/medline.json") #TODO: Changer les valeurs
+
+    collate_fn_question_documents_padding = build_collate_fn(tokenizer,
+                                                         max_number_of_question_tokens=20,
+                                                         max_number_of_document_tokens=300)
+
+    # Create dataloader
+    dl = torch.utils.data.DataLoader(
+        ds,
+        batch_size=64,
+        shuffle=False,
+        collate_fn=collate_fn_question_documents_padding
+    )
 
 if __name__ == "__main__":
     main()
