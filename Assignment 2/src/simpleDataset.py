@@ -96,8 +96,19 @@ def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_doc
     for sample in batch:
         question_ids.append(sample["question_id"])
         document_ids.append(sample["document_id"])
-        question_token_ids.append(sample["question_token_ids"])
-        document_token_ids.append(sample["document_token_ids"])
+
+        question_tokens = sample["question_token_ids"]
+        if len(question_tokens) > max_number_of_question_tokens:
+            question_token_ids.append(question_tokens[:max_number_of_question_tokens])
+        else:
+            question_token_ids.append(question_tokens + [0] * (max_number_of_question_tokens - len(question_tokens)))
+
+        document_tokens = sample["document_token_ids"]
+        if len(document_tokens) > max_number_of_document_tokens:
+            document_token_ids.append(document_tokens[:max_number_of_document_tokens])
+        else:
+            document_token_ids.append(document_tokens + [0] * (max_number_of_document_tokens - len(document_tokens)))
+
         
     # print(f"question_id : {question_ids}")
     # print(f"document_id : {document_ids}")
