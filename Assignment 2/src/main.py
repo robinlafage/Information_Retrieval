@@ -53,15 +53,13 @@ def main():
 
     # model(query_ids2, document_ids2)
 
-    print(tokenizer.vocab_size)
-    print(tokenizer.token_to_id)
+    # print(tokenizer.vocab_size)
+    # print(tokenizer.token_to_id)
     ds = SimpleDataset("../documents/easy_questions.jsonl","../documents/questions_bm25_ranked.jsonl","../documents/easy_medline.jsonl", tokenizer)
-    print(ds.__getitem__(0))
+    # print(ds.__getitem__(0))
 
 
-    collate_fn_question_documents_padding = build_collate_fn(tokenizer,
-                                                         max_number_of_question_tokens=20,
-                                                         max_number_of_document_tokens=300)
+    collate_fn_question_documents_padding = build_collate_fn(tokenizer, max_number_of_question_tokens=20, max_number_of_document_tokens=300)
 
     # Create dataloader
     dl = torch.utils.data.DataLoader(
@@ -70,6 +68,15 @@ def main():
         shuffle=False,
         collate_fn=collate_fn_question_documents_padding
     )
+
+
+    for batch_samples in dl:
+        # retuns a vector of probabilities for each sample in the batch
+        # print(batch_samples)
+        query_ids = batch_samples.pop("question_id")
+        document_id = batch_samples.pop("document_id")
+        probs = model(**batch_samples)
+        print(probs)
 
 if __name__ == "__main__":
     main()
