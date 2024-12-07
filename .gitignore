@@ -31,3 +31,5 @@ env/
 
 #GloVe embeddings files
 glove*
+
+documents/

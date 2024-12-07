@@ -26,6 +26,7 @@ class SimpleDataset(torch.utils.data.Dataset):
 
         # Get positives
 
+        positive_text = None
         number_goldstandard_documents = len(goldstandard_documents)
         index = random.randint(0, number_goldstandard_documents - 1)
         positive_id = goldstandard_documents[index]
@@ -51,7 +52,7 @@ class SimpleDataset(torch.utils.data.Dataset):
 
         # Chose random 1/2
 
-        if random.randint(0, 1) == 0:
+        if random.randint(0, 1) == 0 and positive_text is not None: #TODO bug car positive_text peut etre None a corriger
             document_id = positive_id 
             document_text = positive_text
         else  :
@@ -59,7 +60,7 @@ class SimpleDataset(torch.utils.data.Dataset):
             document_text = negative_text
 
         # Tokenize the texts
-        print(document_text)
+        # print(document_text)
         question_token_ids = self.tokenizer(question_text)
         document_token_ids = self.tokenizer(document_text)
 
@@ -93,26 +94,21 @@ def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_doc
     document_ids = []
 
     for sample in batch:
-        question = sample["question"]
-        document = sample["document"]
-        question_id = sample["question_id"]
-        document_id = sample["document_id"]
+        question_ids.append(sample["question_id"])
+        document_ids.append(sample["document_id"])
+        question_token_ids.append(sample["question_token_ids"])
+        document_token_ids.append(sample["document_token_ids"])
+        
+    # print(f"question_id : {question_ids}")
+    # print(f"document_id : {document_ids}")
+    # print(f"question_token_ids : {question_token_ids}")
+    # print(f"document_token_ids : {document_token_ids}")
 
-        qTokens = tokenizer(question)
-        dTokens = tokenizer(document)
 
-        question_token_ids.append(qTokens)
-        document_token_ids.append(dTokens)
-
-        question_ids.append(question_id)
-        document_ids.append(document_id)
-
-    padded_question_token_ids = torch.nn.utils.rnn.pad_sequence(question_token_ids, batch_first=True, padding_value=0)
-    padded_document_token_ids = torch.nn.utils.rnn.pad_sequence(document_token_ids, batch_first=True, padding_value=0)
 
     return {
-            "question_token_ids": padded_question_token_ids,
-            "document_token_ids": padded_document_token_ids,
+            "queries": question_token_ids,
+            "documents": document_token_ids,
             "question_id": question_ids,
             "document_id": document_ids,
         }
