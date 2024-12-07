@@ -70,13 +70,20 @@ def main():
     )
 
 
+    ranked_documents = {}
     for batch_samples in dl:
         # retuns a vector of probabilities for each sample in the batch
         # print(batch_samples)
         query_ids = batch_samples.pop("question_id")
         document_id = batch_samples.pop("document_id")
         probs = model(**batch_samples)
-        print(probs)
+
+        for prob, query_id, document_id in zip(probs, query_ids, document_id):
+            ranked_documents[query_id] = (document_id, prob.item())
+
+    ranked_documents = dict(sorted(ranked_documents.items(), key=lambda x: x[1][1], reverse=True))
+    print(ranked_documents)
+
 
 if __name__ == "__main__":
     main()
