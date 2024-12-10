@@ -2,7 +2,7 @@ from tokenizer import Tokenizer
 from CNNInteractionBasedModel import CNNInteractionBasedModel
 from LoadingPreTrainedEmbeddings import LoadingPreTrainedEmbeddings
 import torch
-from simpleDataset import SimpleDataset, build_collate_fn
+from SimpleDataset import SimpleDataset, build_collate_fn
 import json
 
 def main():
