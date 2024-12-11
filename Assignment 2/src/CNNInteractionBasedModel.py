@@ -14,7 +14,6 @@ class CNNInteractionBasedModel(torch.nn.Module):
     def forward(self, queries, documents):
         # print("question ids:", query)
         # print("document ids:", document)
-
         probs = []
         for query, document in zip(queries, documents):
 
@@ -43,7 +42,6 @@ class CNNInteractionBasedModel(torch.nn.Module):
             document_lin = document_lin.squeeze()
 
             prob = torch.sigmoid(query_lin + document_lin)
-            print("prob:", prob)
             probs.append(prob)
 
         return probs

@@ -1,9 +1,7 @@
 import torch
-import time
 
 class LoadingPreTrainedEmbeddings:
     def load_glove_embeddings(self, glove_file_path):
-        start = time.time()
         embeddings_index = {}
         with open(glove_file_path, encoding='utf-8') as f:
             for line in f:
@@ -11,8 +9,6 @@ class LoadingPreTrainedEmbeddings:
                 word = values[0]
                 vector = torch.tensor([float(v) for v in values[1:]], dtype=torch.float32)
                 embeddings_index[word] = vector
-        end = time.time()
-        print(f"Read in { end - start }")
         return embeddings_index
 
     def create_glove_matrix(self, words, embeddings_index, embedding_dim):
