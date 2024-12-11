@@ -73,7 +73,7 @@ class SimpleDataset(torch.utils.data.Dataset):
         }
 
 
-def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_document_tokens):
+def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_document_tokens, device):
   def collate_fn(batch):
     """
     batch : list of samples from the dataset
@@ -118,9 +118,10 @@ def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_doc
 
 
     return {
-            "queries": question_token_ids,
-            "documents": document_token_ids,
-            "question_id": question_ids,
-            "document_id": document_ids,
+            "queries": torch.tensor(question_token_ids, dtype=torch.long, device=device),
+            "documents": torch.tensor(document_token_ids, dtype=torch.long, device=device),
+            "question_id": question_ids,  # IDs remain on CPU
+            "document_id": document_ids,  # IDs remain on CPU
         }
   return collate_fn
+
