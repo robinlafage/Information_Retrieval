@@ -52,7 +52,7 @@ class SimpleDataset(torch.utils.data.Dataset):
 
         # Chose random 1/2
 
-        if random.randint(0, 1) == 0 and positive_text is not None: #TODO bug car positive_text peut etre None a corriger
+        if random.randint(0, 1) == 0 :
             document_id = positive_id 
             document_text = positive_text
         else  :

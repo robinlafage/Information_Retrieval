@@ -11,37 +11,29 @@ class CNNInteractionBasedModel(torch.nn.Module):
         self.activ = torch.nn.ReLU()
         self.lin = torch.nn.Linear(32, 1)  # Fixed size after global pooling
 
-    def forward(self, queries, documents):
-        # print("question ids:", query)
-        # print("document ids:", document)
-        probs = []
-        for query, document in zip(queries, documents):
+    def forward(self, queries, documents):  
+        
+        query_tensor = torch.tensor(queries)
+        document_tensor = torch.tensor(documents)
 
-            query_tensor = torch.tensor(query).unsqueeze(0)  # Shape: [1, seq_len]
-            document_tensor = torch.tensor(document).unsqueeze(0)
 
-            query_embedd = self.embedding_layer(query_tensor).unsqueeze(1)  # Shape: [1, 1, seq_len, embedding_dim]
-            document_embedd = self.embedding_layer(document_tensor).unsqueeze(1)
+        query_embedd = self.embedding_layer(query_tensor)
+        document_embedd = self.embedding_layer(document_tensor)
 
-            query_conv = self.conv(query_embedd)
-            document_conv = self.conv(document_embedd)
+        interaction_matrix = torch.matmul(
+            query_embedd,
+            document_embedd.transpose(1, 2) 
+        )
 
-            query_pool = self.pool(query_conv)
-            document_pool = self.pool(document_conv)
+        interaction_matrix = interaction_matrix.unsqueeze(1)
 
-            query_global_pool = self.global_pool(query_pool).squeeze()  # Reduce to shape: [32]
-            document_global_pool = self.global_pool(document_pool).squeeze()
+        conv_output = self.conv(interaction_matrix)
+        pooled_output = self.pool(conv_output)
+        global_pooled_output = self.global_pool(pooled_output).squeeze()
+        actived_ouput = self.activ(global_pooled_output)
+        output = self.lin(actived_ouput).squeeze()
 
-            query_activ = self.activ(query_global_pool)
-            document_activ = self.activ(document_global_pool)
+        prob = torch.sigmoid(output)
 
-            query_lin = self.lin(query_activ)
-            document_lin = self.lin(document_activ)
+        return prob
 
-            query_lin = query_lin.squeeze()
-            document_lin = document_lin.squeeze()
-
-            prob = torch.sigmoid(query_lin + document_lin)
-            probs.append(prob)
-
-        return probs

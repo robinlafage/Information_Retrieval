@@ -75,7 +75,7 @@ def main():
 
     # # Définition de la fonction de padding
     # collate_fn_question_documents_padding = build_collate_fn(
-    #     tokenizer, max_number_of_question_tokens=20, max_number_of_document_tokens=300, device=device
+    #     tokenizer, max_number_of_question_tokens=200, max_number_of_document_tokens=3000, device=device
     # )
 
     # # DataLoader
