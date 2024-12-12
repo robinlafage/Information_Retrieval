@@ -33,3 +33,5 @@ env/
 glove*
 
 documents/
+
+*.pth

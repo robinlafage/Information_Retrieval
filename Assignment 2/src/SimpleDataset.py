@@ -120,8 +120,8 @@ def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_doc
     return {
             "queries": torch.tensor(question_token_ids, dtype=torch.long, device=device),
             "documents": torch.tensor(document_token_ids, dtype=torch.long, device=device),
-            "question_id": question_ids,  # IDs remain on CPU
-            "document_id": document_ids,  # IDs remain on CPU
+            "question_id": question_ids,
+            "document_id": document_ids, 
         }
   return collate_fn
 

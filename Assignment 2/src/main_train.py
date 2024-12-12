@@ -60,11 +60,10 @@ def main():
     # DataLoader
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
-        batch_size=12,
+        batch_size=16,
         shuffle=True,
         collate_fn=collate_fn_question_documents_padding,
-        num_workers=4,
-        prefetch_factor=2
+        num_workers=2
     )
     
     criterion = torch.nn.BCELoss()  # Exemple pour classification
