@@ -5,7 +5,6 @@ import torch
 from SimpleDataset import SimpleDataset, build_collate_fn
 import json
 import time
-import multiprocessing
 
 def main():
     start = time.time()
@@ -15,24 +14,20 @@ def main():
     tokenizer = Tokenizer()
 
     # Préparation des données
+    results = "../documents/training_data_bm25_ranked.jsonl"
     medline = '../documents/MEDLINE_2024_Baseline.jsonl'
+    questions = '../documents/training_data.jsonl'
+
     with open(medline, 'r') as f:
         for doc in f:
             text = json.loads(doc)['text']
             tokenizer.fit(text)
-
-    end = time.time()
-    print(f'Tokenizing the medline : {end-start}sec')
     
-    questions = '../documents/questions.jsonl'
     with open(questions, 'r') as f:
         for doc in f:
             text = json.loads(doc)['question']
             tokenizer.fit(text)
 
-    
-    end = time.time()
-    print(f'Tokenizing all the files : {end-start}sec')
 
     # Chargement des embeddings GloVe
     loadingPreTrainedEmbeddings = LoadingPreTrainedEmbeddings()
@@ -51,9 +46,9 @@ def main():
 
     # Chargement des données
     train_dataset = SimpleDataset(
-        "../documents/training_data.jsonl",
-        "../documents/training_data_bm25_ranked.jsonl",
-        "../documents/MEDLINE_2024_Baseline.jsonl",
+        questions,
+        results,
+        medline,
         tokenizer
     )
 
@@ -65,10 +60,11 @@ def main():
     # DataLoader
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
-        batch_size=16,
+        batch_size=12,
         shuffle=True,
         collate_fn=collate_fn_question_documents_padding,
-        num_workers=4
+        num_workers=4,
+        prefetch_factor=2
     )
     
     criterion = torch.nn.BCELoss()  # Exemple pour classification
@@ -91,7 +87,7 @@ def main():
             outputs = model(queries, documents)
             targets = torch.tensor([1.0 if qid == did else 0.0 for qid, did in zip(batch['question_id'], batch['document_id'])], device=device)
 
-            loss = criterion(torch.stack(outputs), targets)
+            loss = criterion(outputs, targets)
 
             # Backpropagation et mise à jour des poids
             optimizer.zero_grad()
@@ -101,14 +97,15 @@ def main():
             running_loss += loss.item()
             print(f'Part {((i-1)*16)} to {(i*16)-1} of the batch')
         end_epoch = time.time()
-        torch.cuda.empty_cache()  # Libère la mémoire GPU inutilisée
+        torch.save(model.state_dict(), f'../model_temp{epoch+1}.pth')
+        
         print(f'Durée de l\'époque : {(end_epoch-start_epoch)/60} minutes')
         print(f"Époque {epoch + 1}/{num_epochs}, Perte moyenne : {running_loss / len(train_loader):.4f}")
-        torch.save(model.state_dict(), f'../model_temp{epoch+1}.pth')
-    print("Entraînement terminé.")
-    end_training = time.time()
-    print(f'Durée de l\'entrainement : {(end_training-start_training)/60} minutes')
+
     torch.save(model.state_dict(), '../model.pth')
+    end_training = time.time()
+    print("Entraînement terminé.")
+    print(f'Durée de l\'entrainement : {(end_training-start_training)/60} minutes')
     # # Initialisation des résultats
     # ranked_documents = {}
 
