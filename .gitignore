@@ -33,5 +33,6 @@ env/
 glove*
 
 documents/
+model_data/
 
 *.pth
