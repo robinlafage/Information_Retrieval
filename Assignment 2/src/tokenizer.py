@@ -21,7 +21,6 @@ class Tokenizer:
         token_ids = []
         terms = re.split(r'[?.,!:;/\n ]', text)  # Découpe le texte
         terms = list(filter(None, terms))  # Filtre les chaînes vides
-
         for i in range(self.padding_size):
             if i < len(terms):
                 if terms[i].lower() in self.token_to_id:

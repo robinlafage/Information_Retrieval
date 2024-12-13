@@ -13,12 +13,8 @@ class CNNInteractionBasedModel(torch.nn.Module):
 
     def forward(self, queries, documents):  
         
-        query_tensor = torch.tensor(queries)
-        document_tensor = torch.tensor(documents)
-
-
-        query_embedd = self.embedding_layer(query_tensor)
-        document_embedd = self.embedding_layer(document_tensor)
+        query_embedd = self.embedding_layer(queries)
+        document_embedd = self.embedding_layer(documents)
 
         interaction_matrix = torch.matmul(
             query_embedd,

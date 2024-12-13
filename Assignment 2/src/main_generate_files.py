@@ -7,59 +7,70 @@ import json
 import time
 
 def main():
-    # questions = '../documents/questions.jsonl'
-    # medline = '../documents/MEDLINE_2024_Baseline.jsonl'
-    # results = "../documents/training_data_bm25_ranked.jsonl"
-    # medline = '../documents/MEDLINE_2024_Baseline.jsonl'
-    # questions = '../documents/training_data.jsonl'
-    # Préparation des données
-    # with open(medline, 'r') as f:
-    #     for doc in f:
-    #         text = json.loads(doc)['text']
-    #         tokenizer.fit(text)
-
-    # end = time.time()
-    # print(f'Tokenizing the medline : {end-start}sec')
-    
-    # with open(questions, 'r') as f:
-    #     for doc in f:
-    #         text = json.loads(doc)['question']
-    #         tokenizer.fit(text)
-
-    
-    # end = time.time()
-    # print(f'Tokenizing all the files : {end-start}sec')
-
-    # # Chargement des embeddings GloVe
-    # loadingPreTrainedEmbeddings = LoadingPreTrainedEmbeddings()
-    # glove_file = "../glove/glove.6B.50d.txt"  # Chemin vers votre fichier .txt
-    # embeddings_index = loadingPreTrainedEmbeddings.load_glove_embeddings(glove_file)
-
-    # embedding_dim = 50  # Dimension choisie pour les embeddings
-    # vocab, embedding_matrix = loadingPreTrainedEmbeddings.create_glove_matrix(
-    #     list(tokenizer.token_to_id.keys()), embeddings_index, embedding_dim
-    # )
-    # tokenizer.token_to_id = vocab
-    # print(embedding_matrix.shape)
-
     start = time.time()
     device = torch.device('cpu')
-    print(f"Using the device : {device}")
+    print(f"Utilisation de l'appareil : {device}")
     
-    #Loading tokenizer data and embedding matrix
     tokenizer = Tokenizer()
-    embedding_matrix = torch.load('../model_data/embedding_matrix.pth', weights_only=True)
-    with open('../model_data/tokenizer.json', 'r') as f:
-        tokenizer.token_to_id = json.load(f)
-        tokenizer.vocab_size = len(tokenizer.token_to_id)
-    with open('../model_data/padding_size.txt', 'r') as f:
-        tokenizer.padding_size = int(f.read())
+    # questions = '../documents/questions.jsonl'
+    # medline = '../documents/MEDLINE_2024_Baseline.jsonl'
+    results = "../documents/training_data_bm25_ranked.jsonl"
+    medline = '../documents/MEDLINE_2024_Baseline.jsonl'
+    questions = '../documents/training_data.jsonl'
+    # Préparation des données
+    with open(medline, 'r') as f:
+        for doc in f:
+            text = json.loads(doc)['text']
+            tokenizer.fit(text)
+
+    end = time.time()
+    print(f'Tokenizing the medline : {end-start}sec')
+    
+    with open(questions, 'r') as f:
+        for doc in f:
+            text = json.loads(doc)['question']
+            tokenizer.fit(text)
+
+    
+    end = time.time()
+    print(f'Tokenizing all the files : {end-start}sec')
+
+    # Chargement des embeddings GloVe
+    loadingPreTrainedEmbeddings = LoadingPreTrainedEmbeddings()
+    glove_file = "../glove/glove.6B.50d.txt"  # Chemin vers votre fichier .txt
+    embeddings_index = loadingPreTrainedEmbeddings.load_glove_embeddings(glove_file)
+
+    embedding_dim = 50  # Dimension choisie pour les embeddings
+    vocab, embedding_matrix = loadingPreTrainedEmbeddings.create_glove_matrix(
+        list(tokenizer.token_to_id.keys()), embeddings_index, embedding_dim
+    )
+    tokenizer.token_to_id = vocab
+    print(embedding_matrix.shape)
+
+    end = time.time()
+    print(f'Tokenizing the medline : {end-start}sec')
+
+    torch.save(embedding_matrix, '../model_data/embedding_matrix.pth')
+    with open('../model_data/tokenizer.json', 'w') as f:
+        json.dump(tokenizer.token_to_id, f)
+    with open('../model_data/padding_size.txt', 'w') as f:
+        f.write(str(tokenizer.padding_size))
+    
+
+    loaded_embeddings = torch.load('../embedding_matrix.pth')
+
+    # Vérifier qu'ils sont identiques
+    print(torch.equal(embedding_matrix, loaded_embeddings))
 
     # Initialisation du modèle
-    model = CNNInteractionBasedModel(tokenizer.vocab_size, embedding_matrix)
-    checkpoint = torch.load('../model_data/model.pth', weights_only=True)
+    start2 = time.time()
+    print('creating model')
+    model = CNNInteractionBasedModel(tokenizer.vocab_size, loaded_embeddings)
+    print('model created')
+    checkpoint = torch.load('../model.pth', weights_only=True)
 
     model.load_state_dict(checkpoint, strict=True)
+    print('model loaded')
     model.eval()   
     model.to(device)
 
@@ -73,13 +84,60 @@ def main():
     document_ids2 = tokenizer(document2)
     document_ids3 = tokenizer(document3)
     document_ids4 = tokenizer(document4)
+ 
     query_ids = torch.tensor(query_ids)
     document_ids = torch.stack([torch.tensor(document_ids), torch.tensor(document_ids2), torch.tensor(document_ids3), torch.tensor(document_ids4)])
     a = model(query_ids, document_ids)
     print(a)
+    end2 = time.time()
+    print(f'Total execution time : {end2-start2}sec')
+    # # Chargement des données
+    # ds = SimpleDataset(
+    #     "../documents/questions.jsonl",
+    #     "../documents/questions_bm25_ranked.jsonl",
+    #     "../documents/MEDLINE_2024_Baseline.jsonl",
+    #     tokenizer
+    # )
 
-    end = time.time()
-    print(f'Total execution time : {end-start}sec')
+    # # Définition de la fonction de padding
+    # collate_fn_question_documents_padding = build_collate_fn(
+    #     tokenizer, max_number_of_question_tokens=200, max_number_of_document_tokens=3000, device=device
+    # )
+
+    # # DataLoader
+    # dl = torch.utils.data.DataLoader(
+    #     ds,
+    #     batch_size=64,
+    #     shuffle=False,
+    #     collate_fn=collate_fn_question_documents_padding
+    # )
+
+    
+
+    # # Initialisation des résultats
+    # ranked_documents = {}
+
+    # # Traitement par lots
+    # with torch.no_grad():  # Désactivation de la grad pour l'inférence
+    #     ranked_documents = {}
+    #     for batch_samples in dl:
+    #         # retuns a vector of probabilities for each sample in the batch
+    #         # print(batch_samples)
+    #         query_ids = batch_samples.pop("question_id")
+    #         document_id = batch_samples.pop("document_id")
+    #         probs = model(**batch_samples)
+
+    #         for prob, query_id, document_id in zip(probs, query_ids, document_id):
+    #             ranked_documents[query_id] = (document_id, prob.item())
+
+    #     ranked_documents = dict(sorted(ranked_documents.items(), key=lambda x: x[1][1], reverse=True))
+    #     print(ranked_documents)
+
+    # # Tri des documents par probabilité décroissante
+    # ranked_documents = dict(sorted(ranked_documents.items(), key=lambda x: x[1][1], reverse=True))
+    # print(ranked_documents)
+    # end = time.time()
+    # print(f'Total execution time : {end-start}sec')
 
 if __name__ == "__main__":
     main()
