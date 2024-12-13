@@ -73,7 +73,6 @@ def main():
             docsIds = line['retrieved_documents']
 
             docs = {}
-            start2 = time.time()
             with open(medline, 'r') as medlineFile:
                 for doc in medlineFile:
                     doc = json.loads(doc)
@@ -82,8 +81,6 @@ def main():
                         docsIds.remove(doc['doc_id'])
                     if len(docsIds) == 0:
                         break
-            end2 = time.time()
-            print(f'Lecture du medline : {end2-start2}sec')
 
             for i in range(0, len(docs), 2):
                 currentDocs = list(docs.keys())[i:i+2]
@@ -99,7 +96,12 @@ def main():
                 a = model(query_ids, document_ids)
                 print(a)
 
-                break
+                del currentDocs
+                del docsTokens
+                del document_ids
+                del a
+                gc.collect()
+                
             break
 
     # question = "What is the first indication for lurasidone?"
