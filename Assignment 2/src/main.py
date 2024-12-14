@@ -6,6 +6,7 @@ from SimpleDataset import SimpleDataset, build_collate_fn
 import json
 import time
 import gc
+from ndcgMetric import NDCG
 
 def main():
     # questions = '../documents/questions.jsonl'
@@ -64,11 +65,14 @@ def main():
     model.eval()   
     model.to(device)
 
+    maxNumberOfDocs = 2
     retrievedDocs = "../documents/retrieved_docs.jsonl"
+    output = "../output.jsonl"
     with open(retrievedDocs, 'r') as f:
         for line in f:
             line = json.loads(line)
             query = line['question']
+            print(query)
             query_ids = tokenizer(query)
             docsIds = line['retrieved_documents']
 
@@ -82,8 +86,9 @@ def main():
                     if len(docsIds) == 0:
                         break
 
-            for i in range(0, len(docs), 2):
-                currentDocs = list(docs.keys())[i:i+2]
+            probs = {}
+            for i in range(0, len(docs), maxNumberOfDocs):
+                currentDocs = list(docs.keys())[i:i+maxNumberOfDocs]
 
                 docsTokens = []
                 for doc in currentDocs:
@@ -94,15 +99,35 @@ def main():
                 document_ids = torch.stack([torch.tensor(docTokens) for docTokens in docsTokens])
                 query_ids = torch.tensor(query_ids)
                 a = model(query_ids, document_ids)
-                print(a)
 
-                del currentDocs
                 del docsTokens
                 del document_ids
+                gc.collect()
+
+                for j, doc in enumerate(currentDocs):
+                    probs[doc] = a.tolist()[j] if type(a.tolist()) == list else a.tolist()
+                
+                del currentDocs
                 del a
                 gc.collect()
                 
-            break
+
+            probs = {k: v for k, v in sorted(probs.items(), key=lambda item: item[1], reverse=True)}
+            with open(output, 'a') as output_file:
+                output_file.write(json.dumps({"query_id": line['id'], "question": query, "retrieved_documents": list(probs.keys())}) + '\n')
+
+            del probs
+            del docs
+            del docsIds
+            del query_ids
+            del query
+            del line
+            gc.collect()
+
+
+    ndcg = NDCG("../documents/questions.jsonl", "../output.jsonl")
+    print(ndcg.computeMetric())
+            
 
     # question = "What is the first indication for lurasidone?"
     # document = "The development of lurasidone for bipolar depression.\n\nBipolar disorder is a chronic, recurrent illness that ranks among the top 10 causes of disability in the developed world. As the illness progresses, major depressive episodes increasingly predominate. However, few treatment options are available that have demonstrated efficacy in the treatment of bipolar depression, either as monotherapy or adjunctive therapy in combination with mood stabilizers. Lurasidone is an atypical antipsychotic drug that was initially developed for the treatment of schizophrenia. Since no previous atypical antipsychotic development program had proceeded directly from work on schizophrenia to bipolar depression, the decision to focus on this indication represented an innovation in central nervous system drug development and was designed to address a clinically significant unmet need. The current review summarizes key results of a clinical development program undertaken to characterize the efficacy and safety of lurasidone in patients diagnosed with bipolar depression. Lurasidone is currently the only treatment for bipolar depression approved in the United States as both a monotherapy and an adjunctive therapy with lithium or valproate. The approval of lurasidone expands available treatment options for patients with bipolar depression and provides a therapy with an overall favorable risk-benefit profile."
