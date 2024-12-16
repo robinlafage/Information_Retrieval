@@ -6,16 +6,13 @@ from SimpleDataset import SimpleDataset, build_collate_fn
 import json
 import time
 
-def main():
+def train(medline, questions, gloveFile, outputFile):
     start = time.time()
     device = torch.device('cpu')
     print(f"Utilisation de l'appareil : {device}")
     
     tokenizer = Tokenizer()
 
-    # Préparation des données
-    medline = '../documents/MEDLINE_2024_Baseline.jsonl'
-    questions = '../documents/training_data.jsonl'
 
     with open(medline, 'r') as f:
         for doc in f:
@@ -30,8 +27,7 @@ def main():
 
     # Chargement des embeddings GloVe
     loadingPreTrainedEmbeddings = LoadingPreTrainedEmbeddings()
-    glove_file = "../glove/glove.6B.50d.txt"  # Chemin vers votre fichier .txt
-    embeddings_index = loadingPreTrainedEmbeddings.load_glove_embeddings(glove_file)
+    embeddings_index = loadingPreTrainedEmbeddings.load_glove_embeddings(gloveFile)
 
     embedding_dim = 50  # Dimension choisie pour les embeddings
     vocab, embedding_matrix = loadingPreTrainedEmbeddings.create_glove_matrix(
@@ -99,7 +95,7 @@ def main():
         print(f'Durée de l\'époque : {(end_epoch-start_epoch)/60} minutes')
         print(f"Époque {epoch + 1}/{num_epochs}, Perte moyenne : {running_loss / len(train_loader):.4f}")
 
-    torch.save(model.state_dict(), '../model.pth')
+    torch.save(model.state_dict(), outputFile)
     end_training = time.time()
     print("Entraînement terminé.")
     print(f'Durée de l\'entrainement : {(end_training-start_training)/60} minutes')
@@ -129,5 +125,3 @@ def main():
     end = time.time()
     print(f'Total execution time : {end-start}sec')
 
-if __name__ == "__main__":
-    main()
