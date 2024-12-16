@@ -3,12 +3,10 @@ import random
 import torch
 
 class SimpleDataset(torch.utils.data.Dataset):
-    def __init__(self, questionFile, questionsRankedFile, medlineFile, tokenizer):
+    def __init__(self, questionFile, medlineFile, tokenizer):
         super().__init__()
         with open(questionFile, 'r') as f:
             self.questionLines = f.readlines()
-        with open(questionsRankedFile, 'r') as f:
-            self.questionsRankedLines = f.readlines()
         with open(medlineFile, 'r') as f:
             self.medlineLines = f.readlines()
         self.tokenizer = tokenizer

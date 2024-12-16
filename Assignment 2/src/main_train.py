@@ -14,7 +14,6 @@ def main():
     tokenizer = Tokenizer()
 
     # Préparation des données
-    results = "../documents/training_data_bm25_ranked.jsonl"
     medline = '../documents/MEDLINE_2024_Baseline.jsonl'
     questions = '../documents/training_data.jsonl'
 
@@ -47,7 +46,6 @@ def main():
     # Chargement des données
     train_dataset = SimpleDataset(
         questions,
-        results,
         medline,
         tokenizer
     )

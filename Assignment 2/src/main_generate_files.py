@@ -94,7 +94,6 @@ def main():
     # # Chargement des données
     # ds = SimpleDataset(
     #     "../documents/questions.jsonl",
-    #     "../documents/questions_bm25_ranked.jsonl",
     #     "../documents/MEDLINE_2024_Baseline.jsonl",
     #     tokenizer
     # )
