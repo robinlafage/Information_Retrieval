@@ -31,7 +31,7 @@ python3 main.py inputFile outputFile medline [-h] [-m MODEL]
 #### Example
 ```bash
 cd src
-python3 main.py ../documents/retrieved_docs_assignment1.jsonl ../output.jsonl ../documents/MEDLINE_2024_Baseline.jsonl
+python3 main.py ../retrieved_docs_assignment1.jsonl ../output.jsonl ../documents/MEDLINE_2024_Baseline.jsonl
 ```
 
 
