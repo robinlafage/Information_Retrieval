@@ -8,11 +8,10 @@ import time
 
 def train(medline, questions, gloveFile, outputFile):
     start = time.time()
-    device = torch.device('cpu')
+    device = torch.device('cuda')
     print(f"Utilisation de l'appareil : {device}")
     
     tokenizer = Tokenizer()
-
 
     with open(medline, 'r') as f:
         for doc in f:
@@ -23,6 +22,7 @@ def train(medline, questions, gloveFile, outputFile):
         for doc in f:
             text = json.loads(doc)['question']
             tokenizer.fit(text)
+
 
 
     # Chargement des embeddings GloVe
@@ -48,7 +48,7 @@ def train(medline, questions, gloveFile, outputFile):
 
     # Définition de la fonction de padding
     collate_fn_question_documents_padding = build_collate_fn(
-        tokenizer, max_number_of_question_tokens=200, max_number_of_document_tokens=3000, device=device
+        tokenizer, max_number_of_question_tokens=200, max_number_of_document_tokens=2000, device=device
     )
 
     # DataLoader
@@ -56,41 +56,46 @@ def train(medline, questions, gloveFile, outputFile):
         train_dataset,
         batch_size=16,
         shuffle=True,
-        collate_fn=collate_fn_question_documents_padding,
-        num_workers=2
+        collate_fn=collate_fn_question_documents_padding
     )
     
-    criterion = torch.nn.BCELoss()  # Exemple pour classification
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    criterion = torch.nn.MarginRankingLoss(margin=1.0)  # Exemple pour classification
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
-    num_epochs = 10
     print("Début de l'entraînement...")
     start_training = time.time()
+    num_epochs = 10
     for epoch in range(num_epochs):
-        start_epoch = time.time()
         model.train()
         running_loss = 0.0
         i=0
+        start_epoch = time.time()
         for batch in train_loader:
-            i+=1
+            # Récupérer les données du batch
             queries = batch['queries']
-            documents = batch['documents']
+            positive_documents = batch['positive_documents']
+            negative_documents = batch['negative_documents']
 
-            # Forward pass
-            outputs = model(queries, documents)
-            targets = torch.tensor([1.0 if qid == did else 0.0 for qid, did in zip(batch['question_id'], batch['document_id'])], device=device)
+            # Forward pass (prédiction des scores)
+            output_pertinent = model(queries, positive_documents)  # Score pour le document pertinent
+            output_not_pertinent = model(queries, negative_documents)  # Score pour le document non pertinent
 
-            loss = criterion(outputs, targets)
+            # Cible : 1 si le document pertinent est supérieur au non pertinent
+            targets = torch.ones_like(output_pertinent)  # 1 pour les paires pertinentes
+
+            # Calcul de la perte
+            loss = criterion(output_pertinent, output_not_pertinent, targets)
 
             # Backpropagation et mise à jour des poids
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            optimizer.zero_grad()  # Réinitialiser les gradients
+            loss.backward()  # Calcul des gradients
+            optimizer.step()  # Mise à jour des paramètres du modèle
 
             running_loss += loss.item()
+            i+=1
             print(f'Part {((i-1)*16)} to {(i*16)-1} of the batch')
         end_epoch = time.time()
-        torch.save(model.state_dict(), f'../model_temp{epoch+1}.pth')
+        torch.save(model.state_dict(), f'../model_data2/model_temp{epoch+1}.pth')
         
         print(f'Durée de l\'époque : {(end_epoch-start_epoch)/60} minutes')
         print(f"Époque {epoch + 1}/{num_epochs}, Perte moyenne : {running_loss / len(train_loader):.4f}")

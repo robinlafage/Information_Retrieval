@@ -48,78 +48,109 @@ class SimpleDataset(torch.utils.data.Dataset):
             negative_id = negative_document["doc_id"]
             negative_text = negative_document["text"]        
 
-        # Chose random 1/2
 
-        if random.randint(0, 1) == 0 :
-            document_id = positive_id 
-            document_text = positive_text
-        else  :
-            document_id = negative_id
-            document_text = negative_text
 
         # Tokenize the texts
         # print(document_text)
         question_token_ids = self.tokenizer(question_text)
-        document_token_ids = self.tokenizer(document_text)
+        negative_token_ids = self.tokenizer(negative_text)
+        positive_token_ids = self.tokenizer(positive_text)
 
         # get the sample corresponding to index "idx"
         return {
             "question_id":question_id,
-            "document_id":document_id,
+            "positive_id":positive_id,
+            "negative_id":negative_id,
             "question_token_ids": question_token_ids,
-            "document_token_ids": document_token_ids,
+            "positive_token_ids": positive_token_ids,
+            "negative_token_ids": negative_token_ids,
         }
 
+def remove_padding(sequence):
+    """
+    Supprime les 0 à la fin d'une séquence.
+    
+    Args:
+        sequence (list[int]): Une liste de tokens potentiellement paddée avec des 0.
+        
+    Returns:
+        list[int]: La séquence sans le padding (les 0 en fin).
+    """
+    while sequence and sequence[-1] == 0:  # Supprime les 0 à la fin
+        sequence.pop()
+    return sequence
 
 def build_collate_fn(tokenizer, max_number_of_question_tokens, max_number_of_document_tokens, device):
-  def collate_fn(batch):
-    """
-    batch : list of samples from the dataset
-
-    The gold is to pad the question and the document to a uniform size "standard size"
-    you can assume max_number_of_question_tokens and max_number_of_document_tokens as the
-    maximum values allow within the batch or you can compute yourself a dynamic value based on
-    the largest sample in the batch.
-
-    The question_id and document_id can not be tensors since they are not feed to the model
-
-    returns: tensor or a dictionary of tensors.
-    """
-
-    question_token_ids = []
-    document_token_ids = []
-    question_ids = []
-    document_ids = []
-
-    for sample in batch:
-        question_ids.append(sample["question_id"])
-        document_ids.append(sample["document_id"])
-
-        question_tokens = sample["question_token_ids"]
-        if len(question_tokens) > max_number_of_question_tokens:
-            question_token_ids.append(question_tokens[:max_number_of_question_tokens])
-        else:
-            question_token_ids.append(question_tokens + [0] * (max_number_of_question_tokens - len(question_tokens)))
-
-        document_tokens = sample["document_token_ids"]
-        if len(document_tokens) > max_number_of_document_tokens:
-            document_token_ids.append(document_tokens[:max_number_of_document_tokens])
-        else:
-            document_token_ids.append(document_tokens + [0] * (max_number_of_document_tokens - len(document_tokens)))
-
+    def collate_fn(batch):
+        """
+        batch : list of samples from the dataset
+        Le but est de faire du padding pour la question et les documents à une taille uniforme.
+        On peut utiliser max_number_of_question_tokens et max_number_of_document_tokens comme valeurs maximales
+        ou calculer dynamiquement la taille la plus grande dans le batch.
         
-    # print(f"question_id : {question_ids}")
-    # print(f"document_id : {document_ids}")
-    # print(f"question_token_ids : {question_token_ids}")
-    # print(f"document_token_ids : {document_token_ids}")
+        Renvoie : un dictionnaire de tensors.
+        """
+        
+        # Listes pour collecter les tokens
+        question_token_ids = []
+        positive_document_token_ids = []
+        negative_document_token_ids = []
+        question_ids = []
+        positive_document_ids = []
+        negative_document_ids = []
+        for sample in batch:
+            sample["question_token_ids"] = remove_padding(sample["question_token_ids"])
+            sample["positive_token_ids"] = remove_padding(sample["positive_token_ids"])
+            sample["negative_token_ids"] = remove_padding(sample["negative_token_ids"])
 
+        max_question_len = max(len(sample['question_token_ids']) for sample in batch)
+        max_positive_document_len = max(len(sample['positive_token_ids']) for sample in batch)
+        max_negative_document_len = max(len(sample['negative_token_ids']) for sample in batch)
+        
 
+        adaptative_max_number_of_question_tokens = min(max_number_of_question_tokens, max_question_len)
+        max_temp = max(max_positive_document_len, max_negative_document_len)
+        adaptative_max_number_of_document_tokens = min(max_number_of_document_tokens, max_temp)
 
-    return {
+        print(adaptative_max_number_of_question_tokens)
+        print(adaptative_max_number_of_document_tokens)
+        # Traitement de chaque échantillon du batch
+        for sample in batch:
+            question_ids.append(sample["question_id"])
+            positive_document_ids.append(sample["positive_id"])
+            negative_document_ids.append(sample["negative_id"])
+
+            # Récupérer les tokens de la question et des documents
+            question_tokens = sample["question_token_ids"]
+            positive_document_tokens = sample["positive_token_ids"]
+            negative_document_tokens = sample["negative_token_ids"]
+
+            # Padding des tokens de la question
+            if len(question_tokens) > adaptative_max_number_of_question_tokens:
+                question_token_ids.append(question_tokens[:adaptative_max_number_of_question_tokens])
+            else:
+                question_token_ids.append(question_tokens + [0] * (adaptative_max_number_of_question_tokens - len(question_tokens)))
+
+            # Padding des tokens du document pertinent
+            if len(positive_document_tokens) > adaptative_max_number_of_document_tokens:
+                positive_document_token_ids.append(positive_document_tokens[:adaptative_max_number_of_document_tokens])
+            else:
+                positive_document_token_ids.append(positive_document_tokens + [0] * (adaptative_max_number_of_document_tokens - len(positive_document_tokens)))
+
+            # Padding des tokens du document non pertinent
+            if len(negative_document_tokens) > adaptative_max_number_of_document_tokens:
+                negative_document_token_ids.append(negative_document_tokens[:adaptative_max_number_of_document_tokens])
+            else:
+                negative_document_token_ids.append(negative_document_tokens + [0] * (adaptative_max_number_of_document_tokens - len(negative_document_tokens)))
+        
+        # Retourner un dictionnaire avec les tensors
+        return {
             "queries": torch.tensor(question_token_ids, dtype=torch.long, device=device),
-            "documents": torch.tensor(document_token_ids, dtype=torch.long, device=device),
+            "positive_documents": torch.tensor(positive_document_token_ids, dtype=torch.long, device=device),
+            "negative_documents": torch.tensor(negative_document_token_ids, dtype=torch.long, device=device),
             "question_id": question_ids,
-            "document_id": document_ids, 
+            "positive_document_id": positive_document_ids,
+            "negative_document_id": negative_document_ids,
         }
-  return collate_fn
-
+    
+    return collate_fn

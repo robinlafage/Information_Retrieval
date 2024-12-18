@@ -62,9 +62,10 @@ def reranker(modelFile, medline, inputFile, outputFile):
     model.eval()   
     model.to(device)
 
-    maxNumberOfDocs = 2
+    maxNumberOfDocs = 150
     retrievedDocs = inputFile
     output = outputFile
+    minpadding = 370
     with open(retrievedDocs, 'r') as f:
         for line in f:
             line = json.loads(line)
@@ -84,30 +85,51 @@ def reranker(modelFile, medline, inputFile, outputFile):
                         break
 
             probs = {}
-            for i in range(0, len(docs), maxNumberOfDocs):
-                currentDocs = list(docs.keys())[i:i+maxNumberOfDocs]
+            if len(docs) == 1 :
+                for doc in docs:
+                    probs[doc] = 1
 
-                docsTokens = []
-                for doc in currentDocs:
-                    doc_ids = tokenizer(docs[doc])
-                    docsTokens.append(doc_ids)
+            else :
+                for i in range(0, len(docs), maxNumberOfDocs):
+                    currentDocs = list(docs.keys())[i:i+maxNumberOfDocs]
 
+                    docsTokens = []
+                    max_document_len = 0
+                    
+                    for doc in currentDocs:
+                        doc_ids = tokenizer(docs[doc])
+                        docsTokens.append(doc_ids)
+                        if len(doc_ids) > max_document_len :
+                            max_document_len = len(doc_ids)
 
-                document_ids = torch.stack([torch.tensor(docTokens) for docTokens in docsTokens])
-                query_ids = torch.tensor(query_ids)
-                a = model(query_ids, document_ids)
+                    max_document_len = max(minpadding, max_document_len)
+                    docsTokens2 = []
+                    for doc in docsTokens :
+                        if len(doc) > max_document_len:
+                            docsTokens2.append(doc[:max_document_len])
+                        else:
+                            docsTokens2.append(doc + [0] * (max_document_len - len(doc)))
+                        
+                    for doc in docsTokens2 :
+                        print(len(doc))
 
-                del docsTokens
-                del document_ids
-                gc.collect()
+                    document_ids = torch.stack([torch.tensor(docTokens) for docTokens in docsTokens2])
+                    print(document_ids.shape)
+                    query_ids = torch.tensor(query_ids)
+                    a = model(query_ids, document_ids)
 
-                for j, doc in enumerate(currentDocs):
-                    probs[doc] = a.tolist()[j] if type(a.tolist()) == list else a.tolist()
-                
-                del currentDocs
-                del a
-                gc.collect()
-                
+                    del docsTokens
+                    del docsTokens2
+                    del document_ids
+                    gc.collect()
+
+                    for j, doc in enumerate(currentDocs):
+                        probs[doc] = a.tolist()[j] if type(a.tolist()) == list else a.tolist()
+                    
+                    del currentDocs
+                    del a
+                    gc.collect()
+                    
 
             probs = {k: v for k, v in sorted(probs.items(), key=lambda item: item[1], reverse=True)}
             with open(output, 'a') as output_file:
@@ -122,7 +144,7 @@ def reranker(modelFile, medline, inputFile, outputFile):
             gc.collect()
 
 
-    ndcg = NDCG("../documents/questions.jsonl", "../output.jsonl")
+    ndcg = NDCG("../documents/questions.jsonl", output)
     print(ndcg.computeMetric())
             
 

@@ -27,8 +27,6 @@ class Tokenizer:
                     token_ids.append(self.token_to_id[terms[i].lower()])
                 else:
                     token_ids.append(self.token_to_id["<UNK>"])
-            else:
-                token_ids.append(self.token_to_id['<PAD>'])
 
         return token_ids
 
