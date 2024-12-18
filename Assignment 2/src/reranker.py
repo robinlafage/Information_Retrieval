@@ -56,7 +56,7 @@ def reranker(modelFile, medline, inputFile, outputFile):
 
     # Initialisation du modèle
     model = CNNInteractionBasedModel(tokenizer.vocab_size, embedding_matrix)
-    checkpoint = torch.load(modelFile, weights_only=True)
+    checkpoint = torch.load(modelFile, weights_only=True, map_location=torch.device('cpu'))
 
     model.load_state_dict(checkpoint, strict=True)
     model.eval()   
@@ -81,6 +81,8 @@ def reranker(modelFile, medline, inputFile, outputFile):
             query = line['question']
             print(query)
             query_ids = tokenizer(query)
+            if len(query_ids) < 6:
+                query_ids = query_ids + [0] * (6 - len(query_ids))
             docsIds = line['retrieved_documents']
 
             docs = {}
@@ -118,11 +120,8 @@ def reranker(modelFile, medline, inputFile, outputFile):
                         else:
                             docsTokens2.append(doc + [0] * (max_document_len - len(doc)))
                         
-                    for doc in docsTokens2 :
-                        print(len(doc))
 
                     document_ids = torch.stack([torch.tensor(docTokens) for docTokens in docsTokens2])
-                    print(document_ids.shape)
                     query_ids = torch.tensor(query_ids)
                     a = model(query_ids, document_ids)
 
@@ -133,12 +132,14 @@ def reranker(modelFile, medline, inputFile, outputFile):
 
                     for j, doc in enumerate(currentDocs):
                         probs[doc] = a.tolist()[j] if type(a.tolist()) == list else a.tolist()
+                        probs[doc] = [probs[doc]] if type(probs[doc]) != list else probs[doc]
                     
                     del currentDocs
                     del a
                     gc.collect()
                     
 
+            # print(probs)
             probs = {k: v for k, v in sorted(probs.items(), key=lambda item: item[1], reverse=True)}
             with open(output, 'a') as output_file:
                 output_file.write(json.dumps({"query_id": line['id'], "question": query, "retrieved_documents": list(probs.keys())}) + '\n')
