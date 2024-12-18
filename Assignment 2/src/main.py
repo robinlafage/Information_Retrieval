@@ -32,7 +32,7 @@ def readCommandLineArgs():
         trainParser.add_argument("medline", type=str, help="Meline file")
         trainParser.add_argument("training_data", type=str, help="Training data file")
         trainParser.add_argument("outputFile", type=str, help="Output file to save the model")
-        trainParser.add_argument("-g", "--gloveFile", type=str, help="Glove file", default="../glove/glove.6B.50d.txt")
+        trainParser.add_argument("-g", "--gloveFile", type=str, help="Glove file", default="../model_data/glove.6B.50d.txt")
         return 0, trainParser.parse_args(remaining_args)
     else:
         # Rerank mode

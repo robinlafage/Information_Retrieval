@@ -111,29 +111,6 @@ def train(medline, questions, gloveFile, outputFile):
     end_training = time.time()
     print("Entraînement terminé.")
     print(f'Durée de l\'entrainement : {(end_training-start_training)/60} minutes')
-    # # Initialisation des résultats
-    # ranked_documents = {}
-
-    # # Traitement par lots
-    # with torch.no_grad():  # Désactivation de la grad pour l'inférence
-    #     for batch_samples in dl:
-    #         query_ids = batch_samples.pop("question_id")
-    #         document_ids = batch_samples.pop("document_id")
-            
-    #         # Assurez-vous que les tenseurs sont sur le bon appareil
-    #         for key in batch_samples.keys():
-    #             batch_samples[key] = batch_samples[key].to(device)
-
-    #         # Calcul des probabilités
-    #         probs = model(**batch_samples)
-
-    #         # Association des résultats
-    #         for prob, query_id, document_id in zip(probs, query_ids, document_ids):
-    #             ranked_documents[query_id] = (document_id, prob.item())
-
-    # # Tri des documents par probabilité décroissante
-    # ranked_documents = dict(sorted(ranked_documents.items(), key=lambda x: x[1][1], reverse=True))
-    # print(ranked_documents)
     end = time.time()
     print(f'Total execution time : {end-start}sec')
 
