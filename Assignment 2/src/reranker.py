@@ -62,7 +62,7 @@ def reranker(modelFile, medline, inputFile, outputFile):
     model.eval()   
     model.to(device)
 
-    maxNumberOfDocs = 2
+    maxNumberOfDocs = 4
     retrievedDocs = inputFile
     output = outputFile
 
