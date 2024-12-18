@@ -62,10 +62,19 @@ def reranker(modelFile, medline, inputFile, outputFile):
     model.eval()   
     model.to(device)
 
-    maxNumberOfDocs = 150
+    maxNumberOfDocs = 2
     retrievedDocs = inputFile
     output = outputFile
-    minpadding = 370
+
+    with open(retrievedDocs, 'r') as f:
+        line1 = f.readline()
+        line1 = json.loads(line1)
+        if type(line1['retrieved_documents'][0]) == dict:
+            changeInputFileFormat(retrievedDocs, "../documents/inputFileReformatted.jsonl")
+            retrievedDocs = "../documents/inputFileReformatted.jsonl"
+        f.seek(0)
+
+
     with open(retrievedDocs, 'r') as f:
         for line in f:
             line = json.loads(line)
@@ -102,7 +111,6 @@ def reranker(modelFile, medline, inputFile, outputFile):
                         if len(doc_ids) > max_document_len :
                             max_document_len = len(doc_ids)
 
-                    max_document_len = max(minpadding, max_document_len)
                     docsTokens2 = []
                     for doc in docsTokens :
                         if len(doc) > max_document_len:
@@ -172,3 +180,28 @@ def reranker(modelFile, medline, inputFile, outputFile):
 
     end = time.time()
     print(f'Total execution time : {end-start}sec')
+
+
+
+def changeInputFileFormat(inputFile, outputFile):
+    # Delete outputFile content
+    with open(outputFile, "w") as f:
+        pass
+
+    with open(inputFile, "r") as f:
+        output = {}
+        for line in f:
+            data = json.loads(line)
+            query_id = data["query_id"]
+            output["id"] = query_id
+            with open("../documents/questions.jsonl", "r") as q:
+                for line in q:
+                    question = json.loads(line)
+                    if question["query_id"] == query_id:
+                        output["question"] = question["question"]
+                        break
+
+            output["retrieved_documents"] = [doc["id"] for doc in data["retrieved_documents"]]
+
+            with open(outputFile, "a") as out:
+                out.write(json.dumps(output) + "\n")

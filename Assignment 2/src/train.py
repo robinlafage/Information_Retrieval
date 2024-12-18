@@ -101,6 +101,13 @@ def train(medline, questions, gloveFile, outputFile):
         print(f"Époque {epoch + 1}/{num_epochs}, Perte moyenne : {running_loss / len(train_loader):.4f}")
 
     torch.save(model.state_dict(), outputFile)
+
+    torch.save(embedding_matrix, '../model_data/embedding_matrix.pth')
+    with open('../model_data/tokenizer.json', 'w') as f:
+        json.dump(tokenizer.token_to_id, f)
+    with open('../model_data/padding_size.txt', 'w') as f:
+        f.write(str(tokenizer.padding_size))
+
     end_training = time.time()
     print("Entraînement terminé.")
     print(f'Durée de l\'entrainement : {(end_training-start_training)/60} minutes')
