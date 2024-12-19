@@ -16,7 +16,7 @@ tar xvzf model_data.tgz
 ### Run the reranker
 ```bash
 cd src
-python3 main.py inputFile outputFile medline [-h] [-m MODEL]
+python3 main.py inputFile outputFile medline [-h] [-m MODEL] [-q questionsFile]
 ```
 
 #### Arguments
@@ -27,6 +27,7 @@ python3 main.py inputFile outputFile medline [-h] [-m MODEL]
 #### Options
 - `-h`, `--help`: Show help message and exit
 - `-m MODEL`, `--model MODEL`: Model to use for reranking. By default, `../model_data/model.pth` is used.
+- `-q questionsFile`, `--questionsFile questionsFile`: Path to the questions file. By default, `../questions.jsonl` is used.
 
 #### Example
 ```bash
