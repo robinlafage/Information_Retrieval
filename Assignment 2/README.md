@@ -31,7 +31,7 @@ python3 main.py inputFile outputFile medline [-h] [-m MODEL]
 #### Example
 ```bash
 cd src
-python3 main.py ../retrieved_docs_assignment1.jsonl ../output.jsonl ../documents/MEDLINE_2024_Baseline.jsonl
+python3 main.py ../retrieved_docs_assignment1.jsonl ../output.jsonl ../MEDLINE_2024_Baseline.jsonl
 ```
 
 
@@ -53,7 +53,7 @@ python3 main.py --train medline training_data outputFile [-h] [-g gloveFile]
 #### Example
 ```bash
 cd src
-python3 main.py --train ../documents/MEDLINE_2024_Baseline.jsonl ../documents/training_data.jsonl ../model_data/model2.pth
+python3 main.py --train ../MEDLINE_2024_Baseline.jsonl ../training_data.jsonl ../model_data/model2.pth
 ```
 
 

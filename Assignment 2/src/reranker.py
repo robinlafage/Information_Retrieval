@@ -35,8 +35,8 @@ def reranker(modelFile, medline, inputFile, outputFile):
         line1 = f.readline()
         line1 = json.loads(line1)
         if type(line1['retrieved_documents'][0]) == dict:
-            changeInputFileFormat(retrievedDocs, "../documents/inputFileReformatted.jsonl")
-            retrievedDocs = "../documents/inputFileReformatted.jsonl"
+            changeInputFileFormat(retrievedDocs, "../inputFileReformatted.jsonl")
+            retrievedDocs = "../inputFileReformatted.jsonl"
         f.seek(0)
 
 
@@ -130,7 +130,7 @@ def changeInputFileFormat(inputFile, outputFile):
             data = json.loads(line)
             query_id = data["query_id"]
             output["id"] = query_id
-            with open("../documents/questions.jsonl", "r") as q:
+            with open("../questions.jsonl", "r") as q:
                 for line in q:
                     question = json.loads(line)
                     if question["query_id"] == query_id:

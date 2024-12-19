@@ -4,7 +4,7 @@ class CNNInteractionBasedModel(torch.nn.Module):
     def __init__(self, vocab_size, embedding_matrix, hidden_size=64):
         super().__init__()
         self.vocab_size = vocab_size
-        self.embedding_layer = torch.nn.Embedding.from_pretrained(embedding_matrix, freeze=False) # Freeze = True because the layer is already trained
+        self.embedding_layer = torch.nn.Embedding.from_pretrained(embedding_matrix, freeze=True) # Freeze = True because the layer is already trained
 
         self.conv = torch.nn.Conv2d(1, 32, (3, embedding_matrix.size(1)))  
         self.pool = torch.nn.MaxPool2d((3, 1))  
