@@ -1,6 +1,6 @@
 # RI Assignment 2
 
-## How to run the programm
+## How to run the program
 
 ### Install dependencies
 ```bash
