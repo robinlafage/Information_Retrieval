@@ -6,7 +6,7 @@ import time
 import gc
 from ndcgMetric import NDCG
 
-def reranker(modelFile, medline, inputFile, outputFile):
+def reranker(modelFile, medline, inputFile, outputFile, questionsFile):
 
     device = torch.device('cpu')
     
@@ -35,7 +35,7 @@ def reranker(modelFile, medline, inputFile, outputFile):
         line1 = f.readline()
         line1 = json.loads(line1)
         if type(line1['retrieved_documents'][0]) == dict:
-            changeInputFileFormat(retrievedDocs, "../inputFileReformatted.jsonl")
+            changeInputFileFormat(retrievedDocs, "../inputFileReformatted.jsonl", questionsFile)
             retrievedDocs = "../inputFileReformatted.jsonl"
         f.seek(0)
 
@@ -119,7 +119,7 @@ def reranker(modelFile, medline, inputFile, outputFile):
 
 
 
-def changeInputFileFormat(inputFile, outputFile):
+def changeInputFileFormat(inputFile, outputFile, questionsFile):
     # Delete outputFile content
     with open(outputFile, "w") as f:
         pass
