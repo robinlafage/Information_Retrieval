@@ -4,24 +4,18 @@ class CNNInteractionBasedModel(torch.nn.Module):
     def __init__(self, vocab_size, embedding_matrix, hidden_size=64):
         super().__init__()
         self.vocab_size = vocab_size
-        self.embedding_layer = torch.nn.Embedding.from_pretrained(embedding_matrix, freeze=True) # Freeze = True because the layer is already trained
-        # self.conv = torch.nn.Conv2d(1, 32, 3)  # Conv2D: input channels = 1, output channels = 32, kernel_size = 3
-        # self.pool = torch.nn.MaxPool2d(3)      # Pooling with kernel size = 3
-        # self.global_pool = torch.nn.AdaptiveMaxPool2d((1, 1))  # Global Max Pooling to reduce to fixed size
-        # self.activ = torch.nn.ReLU()
-        # self.lin = torch.nn.Linear(32, 1)  # Fixed size after global pooling
+        self.embedding_layer = torch.nn.Embedding.from_pretrained(embedding_matrix, freeze=False) # Freeze = True because the layer is already trained
 
-        self.conv = torch.nn.Conv2d(1, 32, (3, embedding_matrix.size(1)))  # (3, embedding_dim)
-        self.pool = torch.nn.MaxPool2d((3, 1))  # Pooling sur la dimension seq_len
+        self.conv = torch.nn.Conv2d(1, 32, (3, embedding_matrix.size(1)))  
+        self.pool = torch.nn.MaxPool2d((3, 1))  
 
-        # Global Max Pooling pour réduire à une taille fixe
         self.global_pool = torch.nn.AdaptiveMaxPool2d((1, 1))
         
-        # Réseaux Fully Connected pour prédire la probabilité de pertinence
-        self.fc1 = torch.nn.Linear(32, hidden_size)  # Couche cachée
-        self.fc2 = torch.nn.Linear(hidden_size, 1)  # Score de pertinence (une seule sortie)
-        
         self.activ = torch.nn.ReLU()
+        
+        self.fc1 = torch.nn.Linear(32, hidden_size)  
+        self.fc2 = torch.nn.Linear(hidden_size, 1)  
+
 
     def forward(self, queries, documents):  
         query_embedd = self.embedding_layer(queries)
