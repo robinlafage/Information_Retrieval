@@ -6,7 +6,7 @@ def main():
     command, args = readCommandLineArgs()
 
     if command == 1:
-        reranker(modelFile=args.model, medline=args.medline, inputFile=args.inputFile, outputFile=args.outputFile)
+        reranker(modelFile=args.model, medline=args.medline, inputFile=args.inputFile, outputFile=args.outputFile, questionsFile=args.questionsFile)
     elif command == 0:
         train(medline=args.medline, questions=args.training_data, outputFile=args.outputFile, gloveFile=args.gloveFile)
     else:
@@ -43,6 +43,7 @@ def readCommandLineArgs():
         rerankParser.add_argument("outputFile", type=str, help="Output file to save the reranked results")
         rerankParser.add_argument("medline", type=str, help="Medline file")
         rerankParser.add_argument("-m", "--model", type=str, help="Model to use for reranking", default="../model_data/model.pth")
+        rerankParser.add_argument("-q", "--questionsFile", type=str, help="Questions file", default="../questions.jsonl")
         return 1, rerankParser.parse_args(remaining_args)
 
 if __name__ == "__main__":
